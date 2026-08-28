@@ -68,7 +68,7 @@ def _to_candidate(row: dict, score: float) -> Candidate:
 
 
 def retrieve(conversation: str, index: FacetIndex | None = None,
-             top_k: int = 25, mode: str = "hybrid") -> list[Candidate]:
+             top_k: int = 25, mode: str = "dense") -> list[Candidate]:
     """Gate 1: top-K candidate facets. Relevance only, never evidence.
 
     `mode` selects the signal:
@@ -76,10 +76,12 @@ def retrieve(conversation: str, index: FacetIndex | None = None,
       "lexical" BM25 over the same facet text
       "hybrid"  reciprocal rank fusion of both (default)
 
-    Hybrid is the default because dense and lexical fail on opposite cases
-    here: embeddings miss when a short abstract facet name shares no semantic
-    neighbourhood with a concrete narrative, and BM25 misses paraphrase. The
-    ablation in artifacts/ablation_retrieval.md reports what each is worth.
+    DEFAULT IS "dense", and that is load-bearing. An earlier version defaulted
+    to "hybrid" on the assumption that fusing signals must help. The ablation
+    then measured hybrid as WORSE than dense (10/19 vs 12/19 should-score recall
+    at K=25) - but the default was never changed to match, so the pipeline ran
+    a configuration the documentation did not describe and the evidence did not
+    support. See DEBUGGING.md #11.
     """
     index = index or build_index()
     if mode == "lexical":
@@ -99,7 +101,7 @@ def retrieve(conversation: str, index: FacetIndex | None = None,
 
 
 def route(conversation: str, index: FacetIndex | None = None, top_k: int = 25,
-          allow_sensitive: bool = False, mode: str = "hybrid") -> RoutedFacets:
+          allow_sensitive: bool = False, mode: str = "dense") -> RoutedFacets:
     """Gate 1, then Gate 2, then Gate 2b. Only `scorable` may reach the LLM.
 
     Gate 2b (policy) runs AFTER observability because the two refusals mean
