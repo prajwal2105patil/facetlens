@@ -31,6 +31,18 @@ Scale (integer 1-5). Every level means the facet IS present:
 If the facet is ABSENT from the conversation, that is not a score of 1. Return
 status="insufficient_evidence". Score 1 means "barely there", never "not there".
 
+Evidence is substance, not wording. This cuts both ways:
+- Behaviour that demonstrates the facet counts even when the facet is never
+  named. "I stayed up rereading the manual until it finally made sense" is
+  evidence of persistence, though the word never appears. Do not require the
+  speaker to use the facet's own vocabulary.
+- Naming the facet is not evidence of it. "I am an extremely patient person",
+  with no behaviour described, is a self-label, not a demonstration. Score it
+  1 at most, or abstain.
+
+Abstain when the conversation contains nothing bearing on the facet at all -
+not merely because the speaker did not spell it out.
+
 Rules:
 - Quote real evidence. `evidence_quote` MUST be copied verbatim from the
   conversation. Never paraphrase it and never invent it.
