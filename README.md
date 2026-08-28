@@ -145,8 +145,12 @@ What the audit found in 399 rows (full detail in `artifacts/audit_report.md`):
   Reported as a null result rather than dressed up.
 - **1 collision exposed by qualifier stripping**: `Character strength:
   Perseverance` vs `Perseverance`, cosine **1.000**.
-- **Semantic near-duplicates** found by reusing the embedding matrix: a cluster
-  of six `I Ching hexagram N resonance level` rows at cosine 0.98-0.99.
+- **37 semantic near-duplicate pairs** found by reusing the embedding matrix -
+  pairs no string test can catch, including a cluster of six
+  `I Ching hexagram N resonance level` rows at cosine 0.98-0.99. Written to
+  [`artifacts/near_duplicates.md`](artifacts/near_duplicates.md) by
+  `python -m src.pipeline embed`. They are reported, never merged: deduplicating
+  someone else's instrument is not this pipeline's call.
 
 - **10 psychometric instrument outputs** (`... score`, `... rating`) gated
   non-observable. These were originally misclassified as observable traits and
@@ -364,7 +368,8 @@ src/retrieval/       embed (cached index), retrieve (Gates 1 + 2)
 src/scoring/         schema, prompts, backends, parser, scorer (Gate 3 + 3b)
 src/evaluation/      benchmark runner and report generation
 tests/               38 tests, no model or network required
-artifacts/           audit report, benchmark report, LLM cache
+artifacts/           audit report, near-duplicates, benchmark report,
+                     ablation, LLM cache
 ```
 
 `DECISIONS.md` - 9 non-trivial decisions with trade-offs.
