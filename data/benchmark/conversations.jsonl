@@ -1,0 +1,13 @@
+{"conversation_id": "c01_clear", "category": "clear", "text": "I led a team of five engineers and assigned tasks based on their strengths. When two of them disagreed about the architecture, I set up a call and we worked through it together until we had something everyone could live with."}
+{"conversation_id": "c02_ambiguous", "category": "ambiguous", "text": "I guess I'm pretty good at working with people. Mostly it's fine, I don't really think about it much."}
+{"conversation_id": "c03_contradictory", "category": "contradictory", "text": "Honestly I dislike teamwork and I avoid group projects whenever I can. That said, I ran our product team for six months and I enjoyed most of it."}
+{"conversation_id": "c04_quoted", "category": "quoted", "text": "My manager said, \"You're the most assertive person on this team.\" I don't really see it myself. In meetings I usually just go along with whatever has already been decided."}
+{"conversation_id": "c05_sarcastic", "category": "sarcastic", "text": "Oh absolutely, I'm the world's greatest communicator. I once explained a deploy plan so clearly that three people shipped straight to the wrong environment."}
+{"conversation_id": "c06_codeswitched", "category": "code-switched", "text": "Team meeting mein maine sabka opinion suna, phir hum sab ne milkar decide kiya ki naya architecture use karenge. By the end everyone was genuinely on board."}
+{"conversation_id": "c07_low_evidence", "category": "low-evidence", "text": "Things are okay. Not much to report this week."}
+{"conversation_id": "c08_impulsive", "category": "clear", "text": "I booked the flight about an hour after someone mentioned the idea. Didn't really think it through, I just wanted to go."}
+{"conversation_id": "c09_orderly", "category": "clear", "text": "Every Sunday evening I lay out the whole week: colour-coded calendar, meals planned, gym slots blocked out. If it isn't on the list, it doesn't happen."}
+{"conversation_id": "c10_irritable", "category": "clear", "text": "I've been snapping at people over nothing lately. Yesterday I completely lost it because the printer jammed twice in a row."}
+{"conversation_id": "h01_tired", "category": "hallucination-trap", "text": "Honestly I've been so tired the last few weeks. Dragging myself out of bed every morning and I still feel wiped out by lunchtime."}
+{"conversation_id": "h02_saving", "category": "hallucination-trap", "text": "I cut my spending a lot this year and I'm finally managing to put something aside every month instead of living paycheck to paycheck."}
+{"conversation_id": "h03_practice", "category": "hallucination-trap", "text": "I feel so calm and centred after my morning practice. It's easily the best part of my day and I'd be lost without it now."}

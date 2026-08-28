@@ -1,0 +1,38 @@
+# Benchmark facet selection - 30 facets, every one a verbatim row from
+# data/raw/Facets Assignment.csv. Validated by tests/test_benchmark_data.py.
+#
+# Blank lines and lines starting with '#' are ignored.
+
+# ---- conversation-observable ----
+Delegation skills
+Collaboration
+Cooperation
+Talkativeness
+Impulsivity
+Orderliness
+Irritability
+Assertiveness and control in relationships
+Openness
+Enthusiasm
+Adventure-Seeking Behavior
+Withdrawnness
+Decision-making decisiveness
+Brevity
+Self-improvement
+
+# ---- NOT conversation-observable (external / medical / biographical) ----
+FSH level
+Basophil count
+Parathyroid-hormone level
+Sleep Apnea
+Sleep-disorder diagnosis
+Compassion Fatigue
+Intelligence Quotient (IQ)
+Nationality
+Passport-stamps count
+Polygenic risk: cardiovascular disease
+Subscription count
+Caffeine intake (mg/day)
+Pilgrimage participation count
+892. Hindu spiritual metric: Yoga discipline hours / week
+793. Sufi practice: Dhikr repetitions / day
