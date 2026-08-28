@@ -339,29 +339,49 @@ attacks would fail. The medical one held. The leak was in the attack I expected
 to pass, and it surfaced only because the attack was executed rather than
 reasoned about.
 
-### Retrieval is the weakest component
+### Retrieval is the weakest component, and four attempts did not fix it
 
-Measured **before** any labelled facet is force-included, so misses are visible:
+Measured **before** any labelled facet is force-included, so misses are visible
+rather than absorbed. Full table:
+[`artifacts/ablation_retrieval.md`](artifacts/ablation_retrieval.md).
 
-| K | recall on should-score facets | recall on should-abstain facets |
-|---:|---|---|
-| 10 | 9/19 | 5/36 |
-| 25 | **12/19 (63%)** | 8/36 |
-| 60 | 15/19 | 15/36 |
-| 100 | 16/19 | 18/36 |
+Recall of facets the reference says **should be scored** (n=19):
 
-MiniLM on short, abstract trait names is mediocre. Reported separately from
-agreement precisely so it cannot hide - see DECISIONS.md D8.
+| K | bare name | enriched | BM25 | dense+BM25 | **expansions (shipped)** |
+|---:|---|---|---|---|---|
+| 10 | 8/19 | 9/19 | 1/19 | 6/19 | **9/19** |
+| 25 | 11/19 | 12/19 | 2/19 | 10/19 | **12/19 (63%)** |
+| 40 | 14/19 | 12/19 | 4/19 | 13/19 | **13/19** |
+| 100 | 16/19 | 16/19 | 12/19 | 16/19 | **17/19 (89%)** |
 
-**Ablation ([`artifacts/ablation_retrieval.md`](artifacts/ablation_retrieval.md)).**
-Comparing bare facet names against the enriched retrieval text across 6 values
-of K, the enriched variant wins twice, **loses once**, and ties three times. It
-was adopted on the strength of a single example and does not hold up as a clear
-aggregate win - DECISIONS.md D2 records it as weakly supported rather than
-validated. Neither variant exceeds 84% recall even at K=100, which is the
-finding that actually matters.
+**Four interventions were built and measured. None materially moved recall.**
+Two made it actively worse (BM25 alone, and dense+BM25 fusion). A fifth,
+swapping MiniLM for the stronger BGE-small-en-v1.5, scored 10/19 at K=25
+against MiniLM's 12/19 and is recorded in DECISIONS.md D10. Document expansion
+ties at four values of K and gains one facet at two; it ships because it never
+loses, not because it works.
 
----
+**Why the expansion idea misled me.** It was validated by hand first -
+appending example utterances moved three facets from rank 7->2, 7->2 and 9->3.
+But I wrote those examples *after reading the target conversation*. Generated
+blind from a definition, `Collaboration` gets *"I enjoy working in teams"* -
+a perfectly good example, and nothing like *"we worked through it together
+until we had something everyone could live with"*. The hand test measured the
+ceiling, not the method.
+
+**What the failures did buy: a localised diagnosis.** It is not the encoder,
+not the similarity function, not the indexed text - swapping each in turn
+changed almost nothing. A bi-encoder cannot bridge a short abstract label to a
+long concrete narrative. Recall reaches 89% at K=100, so the candidates *are*
+retrievable; they are just not ranked. That points squarely at a **cross-encoder
+reranker over a wide candidate set**, which is the top next step and was not
+attempted because it adds a second model to a machine already generating at
+8 tokens/second.
+
+**This does not corrupt the scoring metrics.** Reference-labelled facets that
+retrieval misses are force-included before scoring (DECISIONS.md D8), so
+agreement measures scoring quality given the right facets, reported alongside
+the recall figure above rather than blended into it.
 
 ## Limitations
 

@@ -225,6 +225,38 @@ and read the data. Had I written it up without checking, the failure analysis
 would have contained a fabricated explanation - in the document whose entire
 purpose is honest failure analysis.
 
+### Correction 8 - I made Correction 4's mistake again, on a bigger scale
+
+Correction 4 records that I generalised a single cosine measurement into a
+design decision that the full ablation later contradicted. I wrote that up,
+noted the lesson, and then did the same thing again about forty minutes later.
+
+Retrieval recall was the system's weakest number, so I hand-tested document
+expansion: appending example utterances to three facets moved their rank
+against a leadership conversation from 7->2, 7->2 and 9->3. That looked
+decisive. I built the generator, spent ~45 minutes of compute generating
+expansions for all 399 facets, and wired it into the index.
+
+Measured result at K=25: **12/19, identical to the incumbent.** Ties at four
+values of K, one extra facet at two others.
+
+The flaw was the same shape as before and I still did not see it: I wrote those
+three example utterances *after reading the conversation they were meant to
+match*. The generated ones are written blind from a facet definition, which is
+the only honest setup and a far harder one. The hand test measured the ceiling
+of the idea, not the method as it would actually be deployed.
+
+**What I would do differently:** the validation should have been run the way
+the system runs - generate expansions for a handful of facets from definitions
+alone, then measure - which would have cost five minutes and saved forty-five.
+A hand-built proof-of-concept that has seen the answer is not evidence about a
+blind method.
+
+Kept in the submission because it never loses (it ties or marginally wins at
+every K), and because four measured failures in a row are what localised the
+real bottleneck: a bi-encoder cannot bridge an abstract label to a concrete
+narrative, and the fix is a reranker, not better inputs to the same comparison.
+
 ## Reference labels - provenance
 
 `data/benchmark/reference_labels.jsonl` was **drafted with AI assistance** and
