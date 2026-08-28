@@ -118,7 +118,7 @@ Runs all 13 benchmark conversations and writes
 from the committed cache.
 
 ```bash
-python -m pytest tests/ -q      # 38 tests, no model or network needed
+python -m pytest tests/ -q      # 57 tests, no model or network needed
 ```
 
 ### Reproducibility check (actually performed)
@@ -127,7 +127,7 @@ Cloned this repository to a clean directory and verified from scratch:
 
 - `enrich` regenerates `enriched_facets.csv` **byte-identically**
   (md5 `0ae85114...` before and after, `git status` clean)
-- **38/38 tests pass** in the fresh clone with no setup beyond `pip install`
+- **57/57 tests pass** in the fresh clone with no setup beyond `pip install`
 - `artifacts/embeddings/*.npy` is gitignored, was absent in the clone, and was
   **regenerated automatically** on first use
 - no `.env`, `.key`, `.pem`, or token files are tracked
@@ -426,36 +426,47 @@ rather than absorbed. Full table:
 
 Recall of facets the reference says **should be scored** (n=19):
 
-| K | bare name | enriched | BM25 | dense+BM25 | **expansions (shipped)** |
-|---:|---|---|---|---|---|
-| 10 | 8/19 | 9/19 | 1/19 | 6/19 | **9/19** |
-| 25 | 11/19 | 12/19 | 2/19 | 10/19 | **12/19 (63%)** |
-| 40 | 14/19 | 12/19 | 4/19 | 13/19 | **13/19** |
-| 100 | 16/19 | 16/19 | 12/19 | 16/19 | **17/19 (89%)** |
+| K | bare name | enriched | BM25 | dense+BM25 | expansions | **+rerank (shipped)** |
+|---:|---|---|---|---|---|---|
+| 10 | 8/19 | 9/19 | 1/19 | 6/19 | 9/19 | 8/19 |
+| 15 | 10/19 | 10/19 | 1/19 | 9/19 | 10/19 | **11/19 (58%)** |
+| 25 | 11/19 | 12/19 | 2/19 | 10/19 | 12/19 | **13/19 (68%)** |
+| 40 | 14/19 | 12/19 | 4/19 | 13/19 | 13/19 | **15/19 (79%)** |
+| 60 | 15/19 | 15/19 | 5/19 | 14/19 | 15/19 | **16/19 (84%)** |
+| 100 | 16/19 | 16/19 | 12/19 | 16/19 | 17/19 | **17/19 (89%)** |
 
-**Four interventions were built and measured. None materially moved recall.**
-Two made it actively worse (BM25 alone, and dense+BM25 fusion). A fifth,
-swapping MiniLM for the stronger BGE-small-en-v1.5, scored 10/19 at K=25
-against MiniLM's 12/19 and is recorded in DECISIONS.md D10. Document expansion
-ties at four values of K and gains one facet at two; it ships because it never
-loses, not because it works.
+**Five interventions were built and measured. Four failed. The fifth worked -
+and it only became findable because the four failures narrowed down where the
+problem was.**
 
-**Why the expansion idea misled me.** It was validated by hand first -
-appending example utterances moved three facets from rank 7->2, 7->2 and 9->3.
-But I wrote those examples *after reading the target conversation*. Generated
-blind from a definition, `Collaboration` gets *"I enjoy working in teams"* -
-a perfectly good example, and nothing like *"we worked through it together
-until we had something everyone could live with"*. The hand test measured the
-ceiling, not the method.
+- **BM25 alone** (11% @ K=25) is near-useless here: conversations describe
+  behaviour, facets are abstract labels, and there is almost no lexical overlap
+  to exploit by construction.
+- **Dense+BM25 fusion** (53%) inherits that weakness - fusing a strong signal
+  with a near-random one drags the ranking down.
+- **BGE-small-en-v1.5** (53%), a stronger encoder on public benchmarks, scored
+  *worse* than MiniLM. Its recommended query prefix made it worse again.
+- **Document expansion** (63%) tied the incumbent. It was hand-validated first,
+  but with examples written by someone who had already read the target
+  conversation - the hand test measured the ceiling, not the method.
 
-**What the failures did buy: a localised diagnosis.** It is not the encoder,
-not the similarity function, not the indexed text - swapping each in turn
-changed almost nothing. A bi-encoder cannot bridge a short abstract label to a
-long concrete narrative. Recall reaches 89% at K=100, so the candidates *are*
-retrievable; they are just not ranked. That points squarely at a **cross-encoder
-reranker over a wide candidate set**, which is the top next step and was not
-attempted because it adds a second model to a machine already generating at
-8 tokens/second.
+**What those four ruled out was the answer.** Swapping the encoder, the
+similarity function and the indexed text each changed almost nothing, leaving
+one fact standing: recall is **89% at K=100 and 63% at K=25**. The right facets
+were already being retrieved and simply ranked badly.
+
+That is a *ranking* problem, and no bi-encoder can solve it - it compresses each
+side to a vector independently, so a short abstract label and a long concrete
+narrative never meet. A cross-encoder reads both together.
+
+**Shipped: retrieve 100 by cosine, reorder with `ms-marco-MiniLM-L-6-v2`
+(22.7M params, Apache-2.0), keep top-K.** Best or tied-best at every K from 15
+upward. **Worse at K=10** (47% -> 42%) - reranking a wide pool needs room to
+place what it promotes, and a fix with a threshold has a threshold worth
+stating.
+
+**Cost:** 8.3s for all 13 conversations, ~0.64s each, against ~50s for one LLM
+scoring batch - roughly 1% of the cost of the stage it feeds.
 
 **This does not corrupt the scoring metrics.** Reference-labelled facets that
 retrieval misses are force-included before scoring (DECISIONS.md D8), so
@@ -536,10 +547,10 @@ misdirected.
    than from what the author believes is set. The confounded comparison that
    produced a false claim in this document would have been visible in a diff
    between two report headers (DEBUGGING.md #11, PROMPT_LOG Correction 9).
-3. **A cross-encoder reranker over K=100.** Recall is 89% at K=100 and 63% at
-   K=25, so the right facets are retrieved and simply not ranked. Four
-   bi-encoder-side interventions failed (DECISIONS.md D10/D11); this is the
-   remaining hypothesis.
+3. **Push the reranker further.** It lifted K=25 recall from 63% to 68% and
+   K=40 from 74% to 79%, but it is an off-the-shelf MS-MARCO model applied to a
+   task it was not trained for. Fine-tuning it on facet/utterance pairs, or
+   raising the operating point to K=40 where it gains most, are both untested.
 4. **Second-model agreement** as a confidence signal, since self-reported
    confidence measured as uninformative (0.9 bucket -> 44% agreement). Try
    `bge-small-en-v1.5`, add lexical BM25 as a hybrid channel (abstract trait
@@ -603,7 +614,7 @@ src/preprocessing/   normalize, taxonomy, anchors, enrich
 src/retrieval/       embed (cached index), retrieve (Gates 1 + 2)
 src/scoring/         schema, prompts, backends, parser, scorer (Gate 3 + 3b)
 src/evaluation/      benchmark runner and report generation
-tests/               38 tests, no model or network required
+tests/               57 tests, no model or network required
 artifacts/           audit report, near-duplicates, benchmark report,
                      ablation, LLM cache
 ```

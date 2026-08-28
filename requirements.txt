@@ -3,6 +3,10 @@
 numpy==2.4.3
 pydantic==2.12.5
 sentence-transformers==5.3.0
+# Imported directly by src/retrieval/embed.py and rerank.py to resolve cached
+# model snapshots to a local path. It arrives transitively with
+# sentence-transformers, but code that imports a package should declare it.
+huggingface-hub==1.8.0
 ollama==0.6.2
 pytest==9.1.1
 

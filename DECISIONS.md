@@ -270,6 +270,8 @@ causes is what identified the real one: an abstract label and a concrete
 narrative do not occupy the same region of *any* embedding space. That is a
 property of the task, not of the tooling, and it needs a different kind of fix.
 
+**That fix is D12.** These four failures are the reason it was findable.
+
 ---
 
 ## D11. Document expansion, generated once and committed as data
@@ -303,3 +305,43 @@ nothing validates the generated utterances beyond their being cached as
 inspectable, committed data. At 5,000 facets this cost scales linearly and
 would want batching on a GPU or a hosted endpoint - but it remains a one-off,
 not a per-query cost.
+
+---
+
+## D12. A cross-encoder reranker, and why a second model is justified here
+
+**Problem.** After D10 and D11, retrieval was still the weakest measured
+component (63% should-score recall at K=25) and four interventions had failed.
+What survived them was a structural fact: recall is **89% at K=100** and 63% at
+K=25. The facets were being retrieved. They were being ranked badly.
+
+**Options.** (a) accept the ceiling; (b) raise K and pay more LLM calls;
+(c) fine-tune a bi-encoder on facet/utterance pairs; (d) rerank a wide pool with
+a cross-encoder.
+
+**Choice: (d).** A bi-encoder embeds each side independently, so an abstract
+label and a concrete narrative are compared only after both have been
+compressed. A cross-encoder attends to them jointly, which is exactly the
+comparison the four failures showed was missing.
+
+(b) was rejected as paying for the symptom - K=40 gains recall but sends ~60%
+more facets to a 50s-per-batch scorer. (c) needs training data this assignment
+does not have.
+
+**Measured:** best or tied-best at every K from 15 up; 63% -> 68% at K=25,
+74% -> 79% at K=40. Worse at K=10.
+
+**Trade-off, stated plainly.** This adds a **second model to the runtime path** -
+the thing D3 and D10 both argued against elsewhere. The justification is
+arithmetic, not preference: 0.64s per conversation against ~50s for one LLM
+batch is ~1% of the cost of the stage it feeds, and it is the only intervention
+of five that moved the number. A dependency that buys a measured improvement at
+1% of the dominant cost is a different proposition from faiss (D3), which would
+have optimised something already 3,000x from the bottleneck.
+
+**What I would still challenge.** It is an MS-MARCO model doing a task it was
+not trained for, validated on 19 labelled facets. A four-example hand check
+suggested it was failing; the full measurement said otherwise. On n=19 a
+one-facet difference is ~5 points, so the K=25 gain (12 -> 13) is real but
+should not be oversold - the K=40 and K=60 gains (+2, +1 with consistent
+direction) carry more weight than any single cell.
