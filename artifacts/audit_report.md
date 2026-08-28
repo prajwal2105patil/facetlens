@@ -5,7 +5,7 @@ from `data/raw/Facets Assignment.csv` at run time; none is hardcoded.
 
 - **Rows analysed:** 399
 - **Distinct raw values:** 399
-- **Classified conversation-observable:** 242 / 399 (60.7%)
+- **Classified conversation-observable:** 241 / 399 (60.4%)
 
 ## 1. Duplicates
 
@@ -89,14 +89,14 @@ silently discarded.
 | value | count | share |
 |---|---:|---:|
 | `personality_trait` | 106 | 26.6% |
-| `quantified_activity_metric` | 52 | 13.0% |
+| `quantified_activity_metric` | 53 | 13.3% |
 | `instrument_or_scale_header` | 35 | 8.8% |
 | `cognitive_test_ability` | 28 | 7.0% |
 | `interpersonal` | 28 | 7.0% |
 | `emotional_state` | 23 | 5.8% |
 | `behavioral_tendency` | 19 | 4.8% |
 | `cognitive_style` | 18 | 4.5% |
-| `preference_lifestyle` | 16 | 4.0% |
+| `preference_lifestyle` | 15 | 3.8% |
 | `motivation_value` | 15 | 3.8% |
 | `clinical_mental_health` | 13 | 3.3% |
 | `biometric_physiological` | 12 | 3.0% |
@@ -113,14 +113,14 @@ classification can be audited or challenged.
 | value | count | share |
 |---|---:|---:|
 | `fallback_bare_trait_noun` | 106 | 26.6% |
-| `quantified_count_noun` | 37 | 9.3% |
+| `quantified_count_noun` | 38 | 9.5% |
 | `structural_header` | 35 | 8.8% |
 | `interpersonal` | 28 | 7.0% |
 | `emotional` | 23 | 5.8% |
 | `cognitive_test_score` | 21 | 5.3% |
 | `behavioral_tendency` | 19 | 4.8% |
 | `cognitive_style` | 18 | 4.5% |
-| `preference_lifestyle` | 16 | 4.0% |
+| `preference_lifestyle` | 15 | 3.8% |
 | `motivation` | 15 | 3.8% |
 | `quantified_unit_bearing` | 15 | 3.8% |
 | `communication` | 12 | 3.0% |
@@ -146,8 +146,8 @@ misclassification.
 
 | value | count | share |
 |---|---:|---:|
-| `low` | 313 | 78.4% |
-| `medium` | 55 | 13.8% |
+| `low` | 314 | 78.7% |
+| `medium` | 54 | 13.5% |
 | `high` | 31 | 7.8% |
 
 ## 7. Known limitations of this audit

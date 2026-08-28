@@ -166,7 +166,8 @@ RULES: tuple[Rule, ...] = (
              r"\bsessions?\b|\bvisits?\b|\bcycles?\b|\bverses?\b|"
              r"\brepetitions?\b|\bcontributions?\b|\bendorsements?\b|"
              r"\bsubscribers?\b|\bstamps?\b|\bfrequency\b|\bduration\b|"
-             r"\bconsistency\b|\bmemorized\b|\bobserved\b")),
+             r"\bconsistency\b|\bmemorized\b|\bobserved\b|\btemperature\b|"
+             r"\bkm\b|\bintake\b")),
 
     # 5. Religion / spirituality. Practice METRICS were caught by rule 4 above;
     #    what reaches here is dispositional and can surface in conversation.

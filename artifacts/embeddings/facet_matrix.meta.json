@@ -1,0 +1,7 @@
+{
+  "fingerprint": "2bb75a6cce94a06c54ec34147626d6a89f629eee09de76ed113e71b96df370ff",
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "text_column": "retrieval_text",
+  "n_facets": 399,
+  "dim": 384
+}
