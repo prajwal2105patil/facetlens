@@ -328,8 +328,33 @@ passing"*, and every level explicitly asserts the facet IS present. The prompt
 states the rule directly: *"If the facet is ABSENT, that is not a score of 1.
 Score 1 means 'barely there', never 'not there'."*
 
-**Verification.** Applied and re-run as part of the final benchmark; results in
-`artifacts/benchmark_report.md`.
+**Verification - and the fix made the overall numbers worse.** The specific case
+is fixed: *"Things are okay"* now scores nothing at all. But re-running the full
+benchmark showed the change was not free:
+
+| | anchor v1 | anchor v2 (shipped) |
+|---|---|---|
+| status agreement | **85.5%** | 74.5% |
+| exact score agreement | **56.2%** | 45.5% |
+| within +/-1 | 93.8% | **100%** |
+| false abstentions | **3** | 8 |
+| missed abstentions | 5 | 6 |
+
+Requiring level 1 to mean "present" raised the model's threshold for scoring at
+all, so borderline facets the reference expects at 2 or 3 now abstain. The fix
+traded one wrong score for five missed ones.
+
+**Shipped anyway**, for reasons stated in README: the errors moved to the safe
+side, +/-1 agreement reached 100%, and v1's better headline was partly earned by
+the defect itself - a scale where "absent" is scorable as 1 agrees with a
+reference set more often while measuring the wrong thing.
+
+**What I would do with more time.** Not revert - re-tune. Level 1 stays
+"present but minimal", with an added instruction that a hedged self-report
+(*"I guess I'm pretty good with people"*) is still evidence and belongs at 2
+rather than at abstention. That targets the exact 8 false abstentions above.
+It was not attempted because validating it costs another full benchmark run,
+and shipping an unvalidated scale change is how you get a third surprise.
 
 **Why it took a benchmark to find.** The anchors read perfectly sensibly in
 isolation, and every review of them passed. The collision only exists in the
