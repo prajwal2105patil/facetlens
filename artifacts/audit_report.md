@@ -5,7 +5,7 @@ from `data/raw/Facets Assignment.csv` at run time; none is hardcoded.
 
 - **Rows analysed:** 399
 - **Distinct raw values:** 399
-- **Classified conversation-observable:** 241 / 399 (60.4%)
+- **Classified conversation-observable:** 245 / 399 (61.4%)
 
 ## 1. Duplicates
 
@@ -22,7 +22,7 @@ from `data/raw/Facets Assignment.csv` at run time; none is hardcoded.
 
 ## 2. Malformed and header-like rows
 
-**35 rows** are catalogue section headers rather than
+**31 rows** are catalogue section headers rather than
 facets. They are detected by two independent signals - a trailing colon, or a
 plural grouping noun such as "Subcomponents" / "Facets" / "Styles" - because
 neither signal alone catches every case (e.g. `Work Styles` has no colon).
@@ -33,7 +33,6 @@ non-observable with `abstention_reason=malformed_or_header_row`. Nothing is
 silently discarded.
 
 - `Democratic Leadership:`
-- `Adventure-Seeking Behavior`
 - `HonestyHumility:`
 - `Relationship Building Themes:`
 - `Numerical Reasoning Subcomponents:`
@@ -46,7 +45,6 @@ silently discarded.
 - `Psychomotor Ability Subcomponents:`
 - `Judging (J):`
 - `HEXACO Personality Inventory Facets:`
-- `Goal-Directed Behavior`
 - `Moral and Ethical Parameters:`
 - `Submission:`
 - `Behavioral Tendencies and Subcomponents:`
@@ -57,9 +55,7 @@ silently discarded.
 - `Time Orientation End Points:`
 - `Conscientiousness (C):`
 - `Conscientiousness Facets:`
-- `Snacking Behavior`
 - `Motivational Drivers:`
-- `Learning Style`
 - `Persistence:`
 - `Numerical Reasoning:`
 - `Leadership Styles:`
@@ -90,14 +86,14 @@ silently discarded.
 |---|---:|---:|
 | `personality_trait` | 106 | 26.6% |
 | `quantified_activity_metric` | 53 | 13.3% |
-| `instrument_or_scale_header` | 35 | 8.8% |
+| `instrument_or_scale_header` | 31 | 7.8% |
 | `cognitive_test_ability` | 28 | 7.0% |
 | `interpersonal` | 28 | 7.0% |
 | `emotional_state` | 23 | 5.8% |
-| `behavioral_tendency` | 19 | 4.8% |
+| `behavioral_tendency` | 20 | 5.0% |
 | `cognitive_style` | 18 | 4.5% |
-| `preference_lifestyle` | 15 | 3.8% |
-| `motivation_value` | 15 | 3.8% |
+| `preference_lifestyle` | 17 | 4.3% |
+| `motivation_value` | 16 | 4.0% |
 | `clinical_mental_health` | 13 | 3.3% |
 | `biometric_physiological` | 12 | 3.0% |
 | `communication_style` | 12 | 3.0% |
@@ -114,14 +110,14 @@ classification can be audited or challenged.
 |---|---:|---:|
 | `fallback_bare_trait_noun` | 106 | 26.6% |
 | `quantified_count_noun` | 38 | 9.5% |
-| `structural_header` | 35 | 8.8% |
+| `structural_header` | 31 | 7.8% |
 | `interpersonal` | 28 | 7.0% |
 | `emotional` | 23 | 5.8% |
 | `cognitive_test_score` | 21 | 5.3% |
-| `behavioral_tendency` | 19 | 4.8% |
+| `behavioral_tendency` | 20 | 5.0% |
 | `cognitive_style` | 18 | 4.5% |
-| `preference_lifestyle` | 15 | 3.8% |
-| `motivation` | 15 | 3.8% |
+| `preference_lifestyle` | 17 | 4.3% |
+| `motivation` | 16 | 4.0% |
 | `quantified_unit_bearing` | 15 | 3.8% |
 | `communication` | 12 | 3.0% |
 | `clinical_named_scale` | 11 | 2.8% |
@@ -146,8 +142,8 @@ misclassification.
 
 | value | count | share |
 |---|---:|---:|
-| `low` | 314 | 78.7% |
-| `medium` | 54 | 13.5% |
+| `low` | 312 | 78.2% |
+| `medium` | 56 | 14.0% |
 | `high` | 31 | 7.8% |
 
 ## 7. Known limitations of this audit

@@ -59,10 +59,33 @@ With bare names, `Nationality` outranks every genuine leadership facet and
 nothing at run time, and pushed the two irrelevant facets from ranks 4-5 down to
 6-8.
 
-**Trade-off.** Longer strings embed slightly slower (irrelevant at 399 rows) and
-the definition text now influences retrieval, so a bad definition degrades
-retrieval as well as scoring. (c) remains the biggest available improvement -
-see the limitations in README.
+**Then I tested it properly, and it did not hold up as well as claimed.**
+`artifacts/ablation_retrieval.md` runs both variants across 6 values of K over
+all 13 conversations and 55 labelled pairs. On recall of facets that *should* be
+scored, enriched text wins at 2 values of K, **loses at 1** (K=40: 12/19 vs
+14/19), and ties at 3.
+
+| K | bare | enriched |
+|---:|---|---|
+| 10 | 8/19 | **9/19** |
+| 25 | 11/19 | **12/19** |
+| 40 | **14/19** | 12/19 |
+| 60 | 15/19 | 15/19 |
+
+**What the single example actually measured.** Enriching the text reliably
+*demotes obviously irrelevant medical and demographic facets* - that part
+reproduces. It is not the same thing as *surfacing more of the right facets*.
+I conflated the two when making the decision.
+
+**Kept anyway, but downgraded to weakly supported.** Demoting non-observable
+facets out of the candidate set is independently useful - it reduces what Gate 2
+has to catch - and it costs nothing at run time. But this is now recorded as a
+decision the evidence does not strongly justify rather than a validated win.
+
+**Trade-off.** The definition text now influences retrieval, so a bad definition
+degrades retrieval as well as scoring. (c) - a stronger embedding model - is the
+real fix and remains the top item in README's "with another day", because
+neither variant exceeds 84% recall even at K=100.
 
 ---
 

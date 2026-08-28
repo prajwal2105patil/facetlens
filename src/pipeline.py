@@ -68,6 +68,13 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_ablation(args: argparse.Namespace) -> int:
+    from .evaluation.ablation import run
+
+    print(f"Wrote {run()}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="src.pipeline", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -98,6 +105,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_bench.add_argument("--limit", type=int, default=None,
                          help="only run the first N conversations (dev loop)")
     p_bench.set_defaults(func=cmd_benchmark)
+
+    sub.add_parser("ablation",
+                   help="compare bare vs enriched retrieval text (no LLM calls)"
+                   ).set_defaults(func=cmd_ablation)
 
     return parser
 

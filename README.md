@@ -241,6 +241,14 @@ Measured **before** any labelled facet is force-included, so misses are visible:
 MiniLM on short, abstract trait names is mediocre. Reported separately from
 agreement precisely so it cannot hide - see DECISIONS.md D8.
 
+**Ablation ([`artifacts/ablation_retrieval.md`](artifacts/ablation_retrieval.md)).**
+Comparing bare facet names against the enriched retrieval text across 6 values
+of K, the enriched variant wins twice, **loses once**, and ties three times. It
+was adopted on the strength of a single example and does not hold up as a clear
+aggregate win - DECISIONS.md D2 records it as weakly supported rather than
+validated. Neither variant exceeds 84% recall even at K=100, which is the
+finding that actually matters.
+
 ---
 
 ## Limitations

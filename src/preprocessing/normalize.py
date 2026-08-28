@@ -78,9 +78,12 @@ def _looks_like_header(raw: str) -> bool:
     stripped = raw.strip()
     if stripped.endswith(":"):
         return True
+    # The grouping noun must be PLURAL. Allowing the singular made
+    # "Adventure-Seeking Behavior" - a real facet - register as a section
+    # header and get gated out as non-observable. A header names a group.
     grouping = (
-        r"\b(subcomponents?|components?|facets?|themes?|types?|styles?|"
-        r"parameters?|end\s+points?|drivers?|behaviors?)\s*$"
+        r"\b(subcomponents|components|facets|themes|types|styles|"
+        r"parameters|end\s+points|drivers|behaviors|behaviours)\s*$"
     )
     return bool(re.search(grouping, stripped, re.IGNORECASE))
 

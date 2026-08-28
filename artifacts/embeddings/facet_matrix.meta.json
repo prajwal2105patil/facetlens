@@ -1,5 +1,5 @@
 {
-  "fingerprint": "2bb75a6cce94a06c54ec34147626d6a89f629eee09de76ed113e71b96df370ff",
+  "fingerprint": "7893a208451ed3fc00b61527f7d6ee9d9d1928332f2be0fcd1fd16c77578268a",
   "model": "sentence-transformers/all-MiniLM-L6-v2",
   "text_column": "retrieval_text",
   "n_facets": 399,
