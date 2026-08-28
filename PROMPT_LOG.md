@@ -183,6 +183,48 @@ design would have hidden. See DECISIONS.md D8.
 
 ---
 
+### Correction 6 - the scoring scale had two right answers
+
+The AI proposed the anchor ladder and I accepted it: `1 = no or very weak
+evidence` through `5 = very strong`. It reads fine. It is also broken, and the
+benchmark proved it.
+
+On *"Things are okay. Not much to report this week."* the system scored
+`Enthusiasm` **1**, with the reason *"The statement is neutral and does not
+express enthusiasm."* The model reasoned perfectly and still failed the case,
+because "no evidence" is simultaneously the definition of anchor 1 **and** the
+definition of `insufficient_evidence`. Two correct answers were on the table and
+nothing in the design said which to prefer.
+
+That is a specification bug, not a model bug, and no amount of prompt tuning
+fixes it. The correct anchor 1 is *"the facet is clearly present but minimally
+expressed"*, leaving absence entirely to abstention.
+
+**Not applied.** Changing anchors changes every prompt, invalidating the LLM
+cache and costing a ~40 minute re-run I could not then validate. Recorded in
+README as the first thing to fix, with the specific replacement text. The brief
+permits a justified decision not to fix under time pressure; this is that
+justification, made explicitly rather than by omission.
+
+### Correction 7 - I nearly wrote a plausible wrong root cause
+
+Two verdicts flipped when the policy gate landed, on facets the policy gate does
+not touch. My first explanation - batch composition changed, so the prompt
+changed, so the verdict changed - was coherent, mechanically plausible, and
+would have made a respectable finding about batch-context contamination.
+
+It was also wrong. Reading the actual verdict records showed
+`evidence_verified: false`: the *evidence verifier* had downgraded them, and
+diffing the quote against the conversation gave the exact divergence at
+character 78 - a full stop the model added when it truncated an otherwise
+verbatim quote (DEBUGGING.md #8).
+
+Worth logging because the failure mode is subtle: a confident, plausible causal
+story is exactly what an LLM produces on demand, and the only defence is to go
+and read the data. Had I written it up without checking, the failure analysis
+would have contained a fabricated explanation - in the document whose entire
+purpose is honest failure analysis.
+
 ## Reference labels - provenance
 
 `data/benchmark/reference_labels.jsonl` was **drafted with AI assistance** and
