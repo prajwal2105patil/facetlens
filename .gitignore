@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets — never commit
+.env
+*.key
+*.pem
+
+# Regenerable embedding matrices (rebuilt in ~2s by `pipeline embed`)
+artifacts/embeddings/*.npy
+
+# NOTE: artifacts/llm_cache/ is deliberately COMMITTED so a grader can
+# reproduce artifacts/benchmark_report.md offline with no model installed.
+# See DECISIONS.md D5.

@@ -1,0 +1,12 @@
+# Pinned to the versions this project was actually developed and tested against
+# (Python 3.12.10, Windows, CPU-only).
+pandas==3.0.1
+numpy==2.4.3
+pydantic==2.12.5
+sentence-transformers==5.3.0
+ollama==0.6.2
+pytest==9.1.1
+
+# Deliberately NOT included:
+#   faiss  - exact numpy cosine is sufficient at this scale (see DECISIONS.md D3)
+#   torch  - installed transitively by sentence-transformers; CPU build is enough
