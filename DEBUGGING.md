@@ -244,3 +244,62 @@ from doing a boring thing I had already written down as done. It is also a
 reminder that the observability gate is only as good as the taxonomy behind it -
 which is exactly why DECISIONS.md D1 accepts false abstentions as the price of
 never inventing a score.
+
+---
+
+## #8. The evidence verifier called a verbatim quote a fabrication
+
+**Symptom.** Adding the policy gate changed two benchmark verdicts that had
+nothing to do with policy. On the code-switched conversation, `Collaboration`
+and `Cooperation` went from `scored 4` to `insufficient_evidence`. Neither is a
+special-category facet, so the policy gate should not have touched them.
+
+**First hypothesis, and why it was wrong.** The obvious explanation was batch
+composition: removing facets changes which facets share a batch, which changes
+the prompt, which changes the cache key and forces a fresh call. Plausible, and
+it would have been a genuine finding about batch-context contamination. It was
+also wrong, and asserting it without checking would have put a fabricated
+explanation into the failure analysis.
+
+**Diagnosis.** Read the actual verdicts instead. Both carried
+`evidence_verified: false` and had been downgraded by the *evidence verifier*,
+not by batching. Diffing the quote against the conversation, normalised, gave
+the exact divergence point:
+
+```
+quote : 'team meeting mein maine sabka opinion suna, phir hum sab ne milkar decide kiya.'
+conv  : 'team meeting mein maine sabka opinion suna, phir hum sab ne milkar decide kiya ki naya architecture use ...'
+first divergence at index 78: quote='.'  conv=' '
+```
+
+**Root cause.** The quote is verbatim for all 78 characters. The model stopped
+mid-sentence and closed with a full stop the source does not contain. My strict
+substring match treated one added character as evidence of fabrication, and the
+verifier did what it was built to do: refuse the score.
+
+The failure mode is *over*-rejection - the safe direction - which is precisely
+why it went unnoticed. It produced more abstentions, and abstentions look like
+caution rather than a bug.
+
+**Fix.** Strip edge punctuation from the quote before matching. This loosens
+punctuation only, never words, so a genuine fabrication is still rejected.
+
+**Verification.** Measured on the full benchmark with the policy gate active:
+
+| metric | before | after |
+|---|---|---|
+| status agreement | 81.8% | **85.5%** |
+| exact score agreement | 50.0% | **56.2%** |
+| false abstentions | 5 | **3** |
+| quotes flagged as fabricated | 4 | **2** |
+
+The two remaining flags are genuine fabrications. No prompt changed, so the LLM
+cache stayed valid and the re-run cost nothing. A regression test pins the
+truncation case.
+
+**Two things worth taking from this.** First, a safety check that fails closed
+is still a bug, and it is harder to spot than one that fails open, because its
+symptom is behaviour you were hoping for. Second, the bug landed hardest on the
+non-English conversation. That is not because the verifier is language-aware -
+it is not - but it is a reminder that a brittle string comparison will
+concentrate its damage wherever the text is least like what you tested on.

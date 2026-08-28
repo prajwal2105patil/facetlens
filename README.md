@@ -236,6 +236,57 @@ pairs, each with a written rationale.
 Every number there is produced by `src/evaluation/evaluate.py`; none is
 hardcoded.
 
+| metric | result |
+|---|---|
+| Status agreement (scored vs abstained vs refused) | **47/55 (85.5%)** |
+| Exact score agreement | 9/16 (56.2%) |
+| Within +/-1 | **15/16 (93.8%)** |
+| Correct abstentions | **31/36 (86.1%)** |
+| Missed abstentions (scored something unsupported) | 5 |
+| False abstentions (abstained where a score was expected) | 3 |
+| Verdicts ending in `error` | **1 of 360** |
+| Fabricated evidence quotes caught | 2 |
+
+**The result that matters most: zero hallucination-trap failures.** Across all
+three traps, not one medical, lab, financial-count or religious-practice facet
+was scored. Every `not_observable` gate held.
+
+### Where it actually fails
+
+The five missed abstentions are not five instances of the same problem, and
+counting them as one number would hide that.
+
+**Two are genuine reasoning failures, both sarcasm.** On *"I'm the world's
+greatest communicator... three people shipped to the wrong environment"*, the
+system scored `Talkativeness` 5 and `Enthusiasm` 4. The prompt explicitly says
+sarcasm inverts meaning; a 7B model read the exaggeration literally anyway. One
+reason is revealing - *"the speaker is highly talkative, providing multiple
+statements and elaborating on an anecdote"* - it scored the **act of writing a
+long message** rather than what the message says. Sarcasm is the clearest
+capability gap in this system.
+
+**One is a flaw in my own scale, not the model's reasoning.** On *"Things are
+okay"*, `Enthusiasm` was scored **1** with the reason *"The statement is neutral
+and does not express enthusiasm."* The model reasoned correctly and still did
+not abstain - because anchor 1 is defined as *"no or very weak evidence"*, which
+collides directly with `insufficient_evidence`. It was offered two correct
+answers and picked the other one. **This is a design bug I introduced.** The fix
+is to redefine anchor 1 as *"the facet is clearly present but minimally
+expressed"*, reserving absence for abstention. It is not applied here: changing
+the anchors changes every prompt, invalidating the whole LLM cache and costing a
+40-minute re-run with no time left to validate the result. Documented rather
+than quietly left.
+
+**Two are over-inference** - `Withdrawnness` from a contradictory statement, and
+`Self-improvement` from a description of weekly planning.
+
+**All three false abstentions trace to one debatable convention in my reference
+labels,** not to system error. I decided a hedged self-report (*"I guess I'm
+pretty good at working with people"*) earns a 2; the system says no behaviour is
+described, so abstain. That is arguably the system being *more* evidence-
+disciplined than my own labels. It is recorded as a disagreement rather than
+silently resolved in the system's favour.
+
 ### Hallucination traps
 
 Each is built from real catalogue rows, and each must abstain:
