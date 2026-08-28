@@ -174,10 +174,18 @@ from `data/raw/Facets Assignment.csv` at run time; none is hardcoded.
 ### Normalised collisions
 {coll_line}
 
-> Reporting a null result honestly matters here. The catalogue contains
-> *semantic* near-duplicates (see `near_duplicates` in the retrieval step),
-> but no exact or normalisation-level duplicates. Claiming otherwise would be
-> a fabricated finding.
+> Reporting a null result honestly matters here. There are **no exact
+> duplicates at all** in this catalogue, and inventing a duplicate-cleanup
+> story would have been a fabricated finding.
+>
+> The {len(findings["normalized_collisions"])} normalisation collision(s) above
+> are only visible *because* the source-instrument qualifier is stripped -
+> `Character strength: Perseverance` and `Perseverance` are distinct raw
+> strings naming one construct. Beyond these, the catalogue also contains
+> *semantic* near-duplicates that no string normalisation can catch; those are
+> detected separately by cosine similarity over the retrieval index
+> (`near_duplicates()`), which finds a cluster of six `I Ching hexagram N
+> resonance level` rows at 0.98-0.99.
 
 ## 2. Malformed and header-like rows
 
