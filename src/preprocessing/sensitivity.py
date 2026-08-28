@@ -53,7 +53,7 @@ SPECIAL_CATEGORIES: tuple[tuple[str, str], ...] = (
     ),
     (
         "religious_or_philosophical_belief",
-        r"\b(religio\w*|spiritual\w*|faith|prayer|worship|meditation|"
+        r"\b(religio\w*|spiritual\w*|faith|pray\w*|worship\w*|meditat\w*|"
         r"mindfulness|holiness|sacred|divine|pilgrimage|scripture|quran|"
         r"bible|zohar|torah|gita|sufi|dhikr|sikh|hindu|jewish|buddhist|"
         r"islamic|christian|bahá|bahai|gnostic|kabbalah|sephira|astrology|"

@@ -21,12 +21,15 @@ You rate how strongly a facet is EVIDENCED in a conversation snippet.
 You are rating the strength of evidence in THIS TEXT, not the person's true
 underlying trait. Use only what the speaker actually says.
 
-Scale (integer 1-5):
-1 = no or very weak evidence
-2 = weak / passing evidence
-3 = moderate, explicit evidence
-4 = strong, elaborated evidence
-5 = very strong, repeated or richly detailed evidence
+Scale (integer 1-5). Every level means the facet IS present:
+1 = present but only minimally expressed - a trace, in passing
+2 = weak but unmistakable expression
+3 = moderate, explicit expression
+4 = strong, elaborated expression
+5 = very strong, repeated or richly detailed expression
+
+If the facet is ABSENT from the conversation, that is not a score of 1. Return
+status="insufficient_evidence". Score 1 means "barely there", never "not there".
 
 Rules:
 - Quote real evidence. `evidence_quote` MUST be copied verbatim from the

@@ -22,6 +22,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from .embed import FacetIndex, build_index, embed_query
+from .lexical import fuse
 
 
 @dataclass(frozen=True)
@@ -67,11 +68,29 @@ def _to_candidate(row: dict, score: float) -> Candidate:
 
 
 def retrieve(conversation: str, index: FacetIndex | None = None,
-             top_k: int = 25) -> list[Candidate]:
-    """Gate 1: top-K facets by cosine similarity. Relevance only."""
+             top_k: int = 25, mode: str = "hybrid") -> list[Candidate]:
+    """Gate 1: top-K candidate facets. Relevance only, never evidence.
+
+    `mode` selects the signal:
+      "dense"   cosine over MiniLM embeddings
+      "lexical" BM25 over the same facet text
+      "hybrid"  reciprocal rank fusion of both (default)
+
+    Hybrid is the default because dense and lexical fail on opposite cases
+    here: embeddings miss when a short abstract facet name shares no semantic
+    neighbourhood with a concrete narrative, and BM25 misses paraphrase. The
+    ablation in artifacts/ablation_retrieval.md reports what each is worth.
+    """
     index = index or build_index()
-    query = embed_query(conversation)
-    scores = index.matrix @ query
+    if mode == "lexical":
+        scores = index.bm25.score(conversation)
+    elif mode == "dense":
+        scores = index.matrix @ embed_query(conversation)
+    elif mode == "hybrid":
+        scores = fuse(index.matrix @ embed_query(conversation),
+                      index.bm25.score(conversation))
+    else:
+        raise ValueError(f"unknown retrieval mode {mode!r}")
     k = min(top_k, len(scores))
     # argpartition is O(n); full sort only over the K we keep.
     top = np.argpartition(-scores, k - 1)[:k]
@@ -80,7 +99,7 @@ def retrieve(conversation: str, index: FacetIndex | None = None,
 
 
 def route(conversation: str, index: FacetIndex | None = None, top_k: int = 25,
-          allow_sensitive: bool = False) -> RoutedFacets:
+          allow_sensitive: bool = False, mode: str = "hybrid") -> RoutedFacets:
     """Gate 1, then Gate 2, then Gate 2b. Only `scorable` may reach the LLM.
 
     Gate 2b (policy) runs AFTER observability because the two refusals mean
@@ -88,7 +107,7 @@ def route(conversation: str, index: FacetIndex | None = None, top_k: int = 25,
     the conversation cannot evidence the facet, `policy_blocked` says it might
     well be inferable and we decline to infer it anyway.
     """
-    candidates = retrieve(conversation, index=index, top_k=top_k)
+    candidates = retrieve(conversation, index=index, top_k=top_k, mode=mode)
     gated_out = [c for c in candidates if not c.conversation_observable]
     observable = [c for c in candidates if c.conversation_observable]
 

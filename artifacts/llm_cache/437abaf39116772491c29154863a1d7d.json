@@ -1,0 +1,11 @@
+{
+  "model": "qwen2.5:7b-instruct",
+  "options": {
+    "temperature": 0.0,
+    "seed": 42,
+    "num_ctx": 4096
+  },
+  "system": "You write short, natural first-person utterances that would appear in a real\nconversation and would be evidence of a given behavioural facet.\n\nRules:\n- 2 utterances per facet, each one sentence, under 15 words.\n- Describe concrete behaviour or a concrete statement. Never name the facet.\n- Write how people actually talk, not how a questionnaire is worded.\n- For facets that could only be established by a test, a lab result, a record\n  or a diagnosis, write what someone would say when REPORTING that fact.\n\nReturn JSON only: {\"expansions\": [{\"facet_id\": \"...\", \"utterances\": [\"...\", \"...\"]}]}",
+  "user": "Write utterances for these facets:\n\n- facet_id=F0032 | FSH level (biometric physiological)\n- facet_id=F0064 | Orderliness (preference lifestyle)\n- facet_id=F0092 | Collaboration (interpersonal)\n- facet_id=F0263 | Talkativeness (communication style)\n- facet_id=F0284 | Delegation skills (interpersonal)\n- facet_id=F0321 | Nationality (demographic biographical)\n- facet_id=F0326 | Impulsivity (behavioral tendency)\n- facet_id=F0361 | Irritability (emotional state)",
+  "response": "{\"expansions\": [{\"facet_id\": \"F0032\", \"utterances\": [\"My FSH level is a bit high.\", \"The doctor said my FSH levels are normal.\"]}, {\"facet_id\": \"F0064\", \"utterances\": [\"I like to keep things neat and tidy.\", \"I always make lists before I start working.\"]}, {\"facet_id\": \"F0092\", \"utterances\": [\"I enjoy working in teams.\", \"We collaborate a lot on projects here.\"]}, {\"facet_id\": \"F0263\", \"utterances\": [\"I talk a lot, don't I?\", \"I can go on and on about anything.\"]}, {\"facet_id\": \"F0284\", \"utterances\": [\"I'm not good at delegating tasks.\", \"I usually take on everything myself.\"]}, {\"facet_id\": \"F0321\", \"utterances\": [\"I'm Canadian.\", \"I was born in the UK, but I consider myself American.\"]}, {\"facet_id\": \"F0326\", \"utterances\": [\"I act without thinking sometimes.\", \"I need to work on my patience.\"]}, {\"facet_id\": \"F0361\", \"utterances\": [\"I get easily annoyed with small things.\", \"I'm feeling a bit irritable today.\"]}]}"
+}

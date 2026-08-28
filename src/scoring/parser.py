@@ -26,6 +26,7 @@ import unicodedata
 
 from pydantic import ValidationError
 
+from ..preprocessing.sensitivity import policy_reason, special_category
 from ..retrieval.retrieve import Candidate
 from .schema import BatchResponse, FacetVerdict, ModelVerdict, Status
 
@@ -195,6 +196,42 @@ def to_facet_verdict(verdict: ModelVerdict, candidate: Candidate,
         if verdict.status == "scored"
         else None
     )
+
+    # Gate 3c: the evidence itself must not be special-category data.
+    #
+    # Found by the red-team pass (artifacts/adversarial_report.md, a05). The
+    # policy gate filters FACETS; it never looked at what a verdict was scored
+    # FROM. So a conversation disclosing religious practice had six religious
+    # facets correctly refused, and then 'Patience: Resistance to anger' scored
+    # 5 at confidence 1.00 quoting "my faith is the main thing keeping me
+    # steady". The protected attribute still shaped the profile, through a
+    # facet that looks innocuous.
+    #
+    # Under the Art. 9 reasoning the policy gate is built on, inferring FROM
+    # special-category data is itself processing it, so the refusal has to
+    # follow the evidence rather than the label.
+    if verdict.status == "scored":
+        evidence_category = special_category(verdict.evidence_quote)
+        if evidence_category is not None:
+            return FacetVerdict(
+                facet_id=candidate.facet_id,
+                facet=candidate.facet,
+                facet_type=candidate.facet_type,
+                status=Status.POLICY_BLOCKED,
+                score=None,
+                confidence=verdict.confidence,
+                reason=(
+                    "Refused by the evidence policy gate: the cited evidence is "
+                    f"itself a disclosure concerning "
+                    f"{evidence_category.replace('_', ' ')}. "
+                    + policy_reason(evidence_category)
+                ),
+                evidence_quote=verdict.evidence_quote,
+                origin="policy_gate",
+                retrieval_score=candidate.retrieval_score,
+                evidence_verified=verified,
+                schema_repaired=schema_repaired,
+            )
 
     if verdict.status == "scored" and verified is False:
         return FacetVerdict(

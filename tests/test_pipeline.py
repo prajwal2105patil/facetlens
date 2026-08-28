@@ -290,3 +290,49 @@ def test_verifier_accepts_a_quote_truncated_with_punctuation():
     assert verify_evidence("...maine sabka opinion suna...", conversation) is True
     # Loosening the edges must NOT loosen the words.
     assert verify_evidence("I have a doctorate in astrophysics.", conversation) is False
+
+
+def test_evidence_level_policy_gate_closes_the_red_team_leak():
+    """Regression for adversarial a05: the policy gate filtered facets but not
+    the evidence they were scored from, so 'Patience: Resistance to anger'
+    scored 5 quoting 'my faith is the main thing keeping me steady'."""
+    from src.retrieval.retrieve import Candidate
+    from src.scoring.parser import to_facet_verdict
+    from src.scoring.schema import ModelVerdict
+
+    conversation = ("I pray twice a day and honestly my faith is the main "
+                    "thing keeping me steady right now.")
+    candidate = Candidate(
+        facet_id="F0001", facet="Patience: Resistance to anger",
+        facet_type="emotional_state", conversation_observable=True,
+        abstention_reason=None, sensitivity="low", special_category=None,
+        scoring_definition="d", score_anchors="a", retrieval_score=0.3,
+    )
+    verdict = ModelVerdict(
+        facet_id="F0001", status="scored", score=5, confidence=1.0,
+        evidence_quote="my faith is the main thing keeping me steady",
+        reason="speaker reports steadiness",
+    )
+    result = to_facet_verdict(verdict, candidate, conversation)
+    assert result.status == Status.POLICY_BLOCKED
+    assert result.score is None
+    assert result.origin == "policy_gate"
+
+
+def test_evidence_gate_does_not_block_ordinary_evidence():
+    from src.retrieval.retrieve import Candidate
+    from src.scoring.parser import to_facet_verdict
+    from src.scoring.schema import ModelVerdict
+
+    conversation = "I led a team of five engineers and assigned tasks by strength."
+    candidate = Candidate(
+        facet_id="F0002", facet="Delegation skills", facet_type="interpersonal",
+        conversation_observable=True, abstention_reason=None, sensitivity="low",
+        special_category=None, scoring_definition="d", score_anchors="a",
+        retrieval_score=0.3,
+    )
+    verdict = ModelVerdict(
+        facet_id="F0002", status="scored", score=4, confidence=0.9,
+        evidence_quote="assigned tasks by strength", reason="delegation described",
+    )
+    assert to_facet_verdict(verdict, candidate, conversation).status == Status.SCORED

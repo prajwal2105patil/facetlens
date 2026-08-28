@@ -18,12 +18,20 @@ regenerable from the raw CSV.
 from __future__ import annotations
 
 # Generic ordinal ladder, shared by every observable type.
+# NOTE ON LEVEL 1. It used to read "no or very weak evidence", which collided
+# head-on with the `insufficient_evidence` status: absence of evidence was
+# simultaneously the definition of a score and the definition of an abstention.
+# The benchmark caught it - on "Things are okay", Enthusiasm was scored 1 with
+# the reason "the statement is neutral and does not express enthusiasm". The
+# model reasoned correctly and still failed the case, because it was offered
+# two correct answers. Level 1 now requires the facet to be PRESENT.
+# See DEBUGGING.md #9.
 SCORE_LEVELS: dict[int, str] = {
-    1: "no or very weak evidence",
-    2: "weak / passing evidence",
-    3: "moderate, explicit evidence",
-    4: "strong, elaborated evidence",
-    5: "very strong, repeated or richly detailed evidence",
+    1: "present but only minimally expressed - a trace, in passing",
+    2: "weak but unmistakable expression",
+    3: "moderate, explicit expression",
+    4: "strong, elaborated expression",
+    5: "very strong, repeated or richly detailed expression",
 }
 
 # Per-type phrasing of *what* counts as evidence. Keeps the ladder concrete.

@@ -44,14 +44,26 @@ def _cache_paths(text_column: str) -> tuple[Path, Path]:
 
 @dataclass
 class FacetIndex:
-    """Facet rows plus their L2-normalised embedding matrix."""
+    """Facet rows, their embedding matrix, and a lazily-built BM25 index."""
 
     facet_ids: list[str]
     rows: list[dict]
     matrix: np.ndarray  # shape (n_facets, dim), unit-norm rows
+    text_column: str = "retrieval_text"
+    _bm25: object = None
 
     def by_id(self, facet_id: str) -> dict:
         return self.rows[self.facet_ids.index(facet_id)]
+
+    @property
+    def bm25(self):
+        """Built on first use: ~10ms for 399 facets, and only the hybrid
+        retriever needs it, so dense-only runs never pay for it."""
+        if self._bm25 is None:
+            from .lexical import BM25Index
+
+            self._bm25 = BM25Index([r[self.text_column] for r in self.rows])
+        return self._bm25
 
 
 def load_enriched(path: Path = ENRICHED_CSV) -> list[dict]:
@@ -120,7 +132,8 @@ def build_index(force: bool = False, model_name: str = EMBED_MODEL,
         if meta.get("fingerprint") == fingerprint:
             matrix = np.load(matrix_path)
             if matrix.shape[0] == len(rows):
-                return FacetIndex([r["facet_id"] for r in rows], rows, matrix)
+                return FacetIndex([r["facet_id"] for r in rows], rows,
+                                  matrix, text_column)
 
     model = _load_model(model_name)
     matrix = model.encode(
@@ -142,7 +155,7 @@ def build_index(force: bool = False, model_name: str = EMBED_MODEL,
         ),
         encoding="utf-8",
     )
-    return FacetIndex([r["facet_id"] for r in rows], rows, matrix)
+    return FacetIndex([r["facet_id"] for r in rows], rows, matrix, text_column)
 
 
 def embed_query(text: str, model_name: str = EMBED_MODEL) -> np.ndarray:
