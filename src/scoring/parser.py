@@ -157,13 +157,31 @@ def _normalise_for_match(text: str) -> str:
     return re.sub(r"\s+", " ", folded).strip()
 
 
+#: Punctuation a model adds when it truncates a quote early. Stripping these
+#: is safe: removing trailing marks can only make the match MORE permissive
+#: about punctuation, never about the words themselves.
+_QUOTE_EDGE = "".join((" \t\n\r", "\"'", "‘’“”",
+                       ".,;:!?", "…", "-"))
+
+
 def verify_evidence(quote: str, conversation: str) -> bool | None:
     """Is the quote genuinely present in the conversation?
 
     Returns True/False, or None when the quote is too short to check
     meaningfully (we do not want to punish a legitimate one-word quote).
+
+    Edge punctuation is stripped before matching. Without this, a model that
+    quotes verbatim but stops mid-sentence and closes with a full stop is
+    scored as having fabricated its evidence. That is exactly what happened on
+    the code-switched benchmark case, where
+
+        quote:  "...phir hum sab ne milkar decide kiya."
+        actual: "...phir hum sab ne milkar decide kiya ki naya architecture..."
+
+    differed by one added character and cost two legitimate scores.
+    See DEBUGGING.md #8.
     """
-    cleaned = quote.strip().strip('"').strip()
+    cleaned = quote.strip().strip(_QUOTE_EDGE).strip()
     if len(cleaned) < MIN_VERIFIABLE_QUOTE:
         return None
     return _normalise_for_match(cleaned) in _normalise_for_match(conversation)

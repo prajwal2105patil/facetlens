@@ -118,6 +118,13 @@ def cmd_ablation(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_redteam(args: argparse.Namespace) -> int:
+    from .evaluation.adversarial import run
+
+    print(f"Wrote {run(top_k=args.top_k, batch_size=args.batch_size, backend_name=args.backend, model=args.model)}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="src.pipeline", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -152,6 +159,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_bench.add_argument("--limit", type=int, default=None,
                          help="only run the first N conversations (dev loop)")
     p_bench.set_defaults(func=cmd_benchmark)
+
+    p_red = sub.add_parser("redteam", help="attack the system's own defences")
+    add_runtime_flags(p_red)
+    p_red.set_defaults(func=cmd_redteam)
 
     sub.add_parser("ablation",
                    help="compare bare vs enriched retrieval text (no LLM calls)"

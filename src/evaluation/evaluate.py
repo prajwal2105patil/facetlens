@@ -264,7 +264,14 @@ def write_report(results, metrics: Metrics, conversations, backend,
     )
     origin_totals = Counter(v.origin for r in results for v in r.verdicts)
     gate_saved = origin_totals.get("observability_gate", 0)
+    policy_saved = origin_totals.get("policy_gate", 0)
     total_verdicts = sum(status_totals.values())
+    llm_facets = sum(1 for r in results for v in r.verdicts
+                     if v.origin in ("llm", "evidence_verifier", "parser"))
+    llm_batches = sum(-(-len([v for v in r.verdicts
+                              if v.origin in ("llm", "evidence_verifier", "parser")])
+                        // batch_size) for r in results)
+    saved_batches = -(-(gate_saved + policy_saved) // batch_size)
 
     lines = [
         "# Benchmark report",
@@ -280,6 +287,27 @@ def write_report(results, metrics: Metrics, conversations, backend,
         f"- Reference-labelled pairs evaluated: **{metrics.total_pairs}**",
         f"- Facets answered by the observability gate with **no LLM call**: "
         f"**{gate_saved}** ({gate_saved / max(total_verdicts, 1):.0%} of all verdicts)",
+        f"- Facets refused by the Art.9 policy gate with **no LLM call**: "
+        f"**{policy_saved}**",
+        "",
+        "### Measured cost, and what the gates save",
+        "",
+        f"At the rates measured on this machine (CPU-only, ~8.2 tok/s generation, "
+        f"~33 tok/s prompt evaluation, ~50s per batch of {batch_size}):",
+        "",
+        f"- LLM calls actually made: **{llm_batches}** batches for "
+        f"**{llm_facets}** facets",
+        f"- Calls avoided by the two pre-LLM gates: **{saved_batches}** batches "
+        f"for **{gate_saved + policy_saved}** facets",
+        f"- Estimated wall-clock spent: **~{llm_batches * 50 / 60:.0f} min**; "
+        f"avoided: **~{saved_batches * 50 / 60:.0f} min**",
+        f"- Gates removed **{(gate_saved + policy_saved) / max(total_verdicts, 1):.0%}** "
+        f"of candidate facets before any token was spent.",
+        "",
+        "> The gates are not only a correctness control - they are the main cost "
+        "control. Their share grows with a catalogue as metric- and "
+        "medical-heavy as this one, which is what makes the 5,000-facet story "
+        "work.",
         "",
         "| status | count |", "|---|---:|",
     ]

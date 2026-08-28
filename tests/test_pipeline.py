@@ -276,3 +276,17 @@ def test_allow_sensitive_is_an_explicit_opt_in():
     index = build_index()
     assert route(text, index, top_k=10).policy_blocked
     assert not route(text, index, top_k=10, allow_sensitive=True).policy_blocked
+
+
+def test_verifier_accepts_a_quote_truncated_with_punctuation():
+    """Regression: a verbatim quote that stops early and closes with a full
+    stop was scored as fabricated, costing two legitimate scores on the
+    code-switched benchmark case. See DEBUGGING.md #8."""
+    conversation = ("Team meeting mein maine sabka opinion suna, phir hum sab "
+                    "ne milkar decide kiya ki naya architecture use karenge.")
+    truncated = ("Team meeting mein maine sabka opinion suna, phir hum sab ne "
+                 "milkar decide kiya.")
+    assert verify_evidence(truncated, conversation) is True
+    assert verify_evidence("...maine sabka opinion suna...", conversation) is True
+    # Loosening the edges must NOT loosen the words.
+    assert verify_evidence("I have a doctorate in astrophysics.", conversation) is False
