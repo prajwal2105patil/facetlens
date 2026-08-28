@@ -26,10 +26,21 @@ briefly.
 
 **Trade-off.** The guarantee moves from "the model behaved" to "the taxonomy is
 correct" - a much better place for it, because the taxonomy is inspectable,
-testable and version-controlled. But it means a *misclassification* now causes a
-**false abstention**. That is the price, it is measured explicitly in the
-benchmark, and it is the safer direction to be wrong in: a false abstention
-costs coverage, a missed abstention invents a fact.
+testable and version-controlled. But it means a *misclassification* now becomes
+the system's dominant error mode.
+
+**And the taxonomy is measurably imperfect.** A seeded 30-row manual review
+found **4 errors (13.3%)** - and, uncomfortably for this design, all four were
+*false-observable*: rows wrongly sent onward to the LLM rather than wrongly
+gated (DEBUGGING.md #7). They were fixed, but the honest reading is that the
+gate leaks in the dangerous direction as well as the safe one, at something like
+a 10% rate.
+
+That does not invalidate the choice - a prompt-only gate would leak at least as
+much, with no audit trail and no way to fix a class of errors in one line. But
+it does mean the correct claim is "abstention is *auditable and fixable*", not
+"abstention is guaranteed". The benchmark measures false abstentions rather than
+assuming they are zero, and the spot-check measures the other direction.
 
 ---
 
