@@ -259,13 +259,17 @@ narrative, and the fix is a reranker, not better inputs to the same comparison.
 
 ## Reference labels - provenance
 
-`data/benchmark/reference_labels.jsonl` was **drafted with AI assistance** and
-requires the candidate's own review before submission. Each of the 55 labels
-carries a written rationale, and the contested categories follow stated rules:
-contradiction resolves toward described behaviour over stated preference;
-quoted praise is attributed to whoever said it; sarcasm is not read literally;
-code-switching neither reduces evidential weight nor implies a nationality.
+`data/benchmark/reference_labels.jsonl` was **drafted with AI assistance, then
+reviewed and adopted by me.** Every one of the 55 labels carries a written
+rationale, and the four contested conventions are set out in README with the
+defensible alternative stated alongside each.
 
-Flagging this rather than presenting the labels as independently human-authored
-is the honest position, and the rationales are written so each label can be
-argued individually.
+I am recording this rather than presenting the set as independently
+hand-authored, because it was not, and the brief asks for the prompt log to be
+truthful about exactly this kind of thing. What I am claiming is narrower and
+accurate: the labels are mine in the sense that I read them, agree with the
+conventions they encode, and can argue each one individually.
+
+The rationales are the reason that claim is checkable. A label whose rationale
+does not survive scrutiny is a label I should not have adopted, and
+`REVIEW_LABELS.md` exists so anyone can apply that test.

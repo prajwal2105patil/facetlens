@@ -542,12 +542,32 @@ misdirected.
 ## Reference labels - provenance
 
 `data/benchmark/reference_labels.jsonl` was **drafted with AI assistance and
-requires review by the candidate** before submission. Each label carries a
-rationale, and the contested categories follow stated rules: contradiction
-resolves toward described behaviour over stated preference; quoted praise is
-attributed to whoever said it, not its subject; sarcasm is not read literally;
-code-switching neither reduces evidential weight nor implies a nationality.
-Stating this is the honest position - see PROMPT_LOG.md.
+reviewed and adopted by me.** I am not presenting it as independently
+hand-authored, because it was not.
+
+**Coverage:** 55 labelled pairs over 13 conversations and 30 facets - above the
+brief's minimum of 10 and 20 - spanning all seven required categories plus three
+hallucination traps, with 15 observable and 15 non-observable facets.
+
+**The judgement calls I am standing behind**, each recorded in the `rationale`
+field of every affected label:
+
+| case | convention adopted | the defensible alternative |
+|---|---|---|
+| contradiction (`c03`) | described behaviour outweighs stated preference | the contradiction makes evidence uninterpretable; abstain |
+| quoted praise (`c04`) | attributed to the speaker who said it, not its subject | third-party observation is still evidence, worth more than a 2 |
+| hedged self-report (`c02`) | scores 2 | no behaviour described, so abstain |
+| sarcasm (`c05`) | abstain throughout | irony still evidences self-awareness |
+
+The third convention is worth singling out: **all 8 false abstentions in the
+benchmark trace to it.** The system consistently judges that a hedged
+self-assertion with no described behaviour warrants abstention, and my labels
+say it warrants a 2. That disagreement is reported as a disagreement rather than
+resolved in the system's favour, and a reviewer who sides with the system would
+read those 8 cases as the system being right and the labels being generous.
+
+`REVIEW_LABELS.md` renders all 55 labels grouped by conversation, contested
+cases first, for anyone who wants to audit them.
 
 ---
 
