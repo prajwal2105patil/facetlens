@@ -14,9 +14,11 @@ conversation does not support.
 The supplied catalogue mixes things a conversation can genuinely evidence
 (`Talkativeness`, `Delegation skills`) with things it cannot: lab values
 (`FSH level`, `Basophil count`), clinical constructs (`Sleep Apnea`), test scores
-(`Intelligence Quotient (IQ)`), biographical facts (`Nationality`), activity
-counts requiring records (`Passport-stamps count`), and 31 catalogue *section
-headers* that are not facets at all (`Leadership Potential:`).
+(`Intelligence Quotient (IQ)`), psychometric instrument outputs
+(`Honesty-humility trait score`, `Ethical leadership rating`), biographical
+facts (`Nationality`), activity counts requiring records
+(`Passport-stamps count`), and 31 catalogue *section headers* that are not
+facets at all (`Leadership Potential:`).
 
 A retriever is perfectly happy to return `FSH level` for "I've been so tired
 lately". The system's job is to know that retrieving it and being able to score
@@ -146,12 +148,17 @@ What the audit found in 399 rows (full detail in `artifacts/audit_report.md`):
 - **Semantic near-duplicates** found by reusing the embedding matrix: a cluster
   of six `I Ching hexagram N resonance level` rows at cosine 0.98-0.99.
 
-Every row records which named rule classified it, so any classification can be
-challenged. **~27% of rows match no keyword rule** and fall through to a
-default of observable `personality_trait` - mostly genuine bare disposition
-nouns (`Naivety`, `Cunningness`), but that is a default, and it is the most
-likely source of error. This classifier is heuristic and is not claimed to be
-correct on every row.
+- **10 psychometric instrument outputs** (`... score`, `... rating`) gated
+  non-observable. These were originally misclassified as observable traits and
+  were caught by the manual spot-check - see DEBUGGING.md #7.
+
+Of 399 rows, **235 are conversation-observable**. Every row records which named
+rule classified it, so any classification can be challenged. **100 rows (25%)
+match no keyword rule** and fall through to a default of observable
+`personality_trait` - mostly genuine bare disposition nouns (`Naivety`,
+`Cunningness`), but that is a default, and it is the most likely remaining
+source of error. No row is forced into `other`; the fallback absorbs ambiguity
+instead.
 
 **Scoring anchors.** `1` no/very weak - `2` weak - `3` moderate - `4` strong -
 `5` very strong. The quantity scored is *strength of evidenced expression in
