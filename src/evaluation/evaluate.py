@@ -23,7 +23,8 @@ from pathlib import Path
 from ..retrieval.embed import FacetIndex, build_index
 from ..retrieval.retrieve import Candidate, route
 from ..scoring.backends import get_backend
-from ..scoring.scorer import _chunk, _gate_verdict, score_batch
+from ..scoring.scorer import (_chunk, _gate_verdict, _policy_verdict,
+                              score_batch)
 from ..scoring.schema import ConversationResult, FacetVerdict, Status
 
 BENCH_DIR = Path("data/benchmark")
@@ -33,7 +34,8 @@ FACET_LIST = BENCH_DIR / "benchmark_facets.txt"
 REPORT = Path("artifacts/benchmark_report.md")
 RESULTS = Path("artifacts/benchmark_results.jsonl")
 
-ABSTAIN = (Status.NOT_OBSERVABLE, Status.INSUFFICIENT_EVIDENCE)
+ABSTAIN = (Status.NOT_OBSERVABLE, Status.INSUFFICIENT_EVIDENCE,
+           Status.POLICY_BLOCKED)
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -57,6 +59,7 @@ def _candidate_from_row(row: dict, retrieval_score: float | None) -> Candidate:
         conversation_observable=row["conversation_observable"],
         abstention_reason=row["abstention_reason"] or None,
         sensitivity=row["sensitivity"],
+        special_category=row.get("special_category") or None,
         scoring_definition=row["scoring_definition"],
         score_anchors=row["score_anchors"],
         retrieval_score=retrieval_score if retrieval_score is not None else -1.0,
@@ -89,7 +92,8 @@ def run_benchmark(top_k: int = 15, batch_size: int = 5,
                   backend_name: str = "ollama",
                   model: str = "qwen2.5:7b-instruct",
                   limit: int | None = None,
-                  index: FacetIndex | None = None) -> Path:
+                  index: FacetIndex | None = None,
+                  allow_sensitive: bool = False) -> Path:
     index = index or build_index()
     backend = get_backend(backend_name, model)
     conversations = load_jsonl(CONVERSATIONS)
@@ -107,10 +111,11 @@ def run_benchmark(top_k: int = 15, batch_size: int = 5,
 
     for conv in conversations:
         text = conv["text"]
-        routed = route(text, index=index, top_k=top_k)
-        retrieved_ids = {c.facet_id for c in routed.scorable} | {
-            c.facet_id for c in routed.gated_out
-        }
+        routed = route(text, index=index, top_k=top_k,
+                       allow_sensitive=allow_sensitive)
+        retrieved_ids = ({c.facet_id for c in routed.scorable}
+                         | {c.facet_id for c in routed.gated_out}
+                         | {c.facet_id for c in routed.policy_blocked})
 
         # Retrieval recall is measured BEFORE forcing anything in.
         for label in ref_by_conv[conv["conversation_id"]]:
@@ -133,6 +138,7 @@ def run_benchmark(top_k: int = 15, batch_size: int = 5,
              ).append(candidate)
 
         verdicts = [_gate_verdict(c) for c in routed.gated_out + forced_gated]
+        verdicts += [_policy_verdict(c) for c in routed.policy_blocked]
         for batch in _chunk(routed.scorable + forced_scorable, batch_size):
             verdicts.extend(score_batch(text, batch, backend))
         verdicts.sort(key=lambda v: (-(v.retrieval_score or 0.0), v.facet_id))

@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from .normalize import NormalizedFacet
+from .sensitivity import special_category
 
 # --------------------------------------------------------------------------
 # Facet types. Observability is a property of the type (see _OBSERVABLE below).
@@ -259,6 +260,8 @@ class Classification:
     sensitivity: str
     abstention_reason: str | None
     classification_rule: str
+    #: GDPR Art. 9(1) special category this facet concerns, if any.
+    special_category: str | None
 
 
 def classify(facet: NormalizedFacet) -> Classification:
@@ -269,7 +272,7 @@ def classify(facet: NormalizedFacet) -> Classification:
     *content* would be meaningless.
     """
     if facet.is_header_like:
-        return _finalize("instrument_or_scale_header", _STRUCTURAL_RULE)
+        return _finalize("instrument_or_scale_header", _STRUCTURAL_RULE, None)
 
     # Match against the normalised name plus any stripped source qualifier, so
     # that "926. Bahá'í spiritual metric: Ridván festival participation" is
@@ -278,23 +281,31 @@ def classify(facet: NormalizedFacet) -> Classification:
     if facet.source_qualifier:
         haystack = f"{facet.source_qualifier} {haystack}"
 
+    category = special_category(haystack)
+
     for rule in RULES:
         if rule.name == _STRUCTURAL_RULE:
             continue
         if rule.test(haystack):
-            return _finalize(rule.facet_type, rule.name)
+            return _finalize(rule.facet_type, rule.name, category)
 
     # Explicit fallback. Bare trait nouns ("Naivety", "Cunningness", "Dignity")
     # legitimately land here: they are single-word dispositions with no keyword
     # signal. Treating them as observable personality traits is the defensible
     # default for a *personality* catalogue, but it IS a default, and the audit
     # report counts how many rows depend on it.
-    return _finalize("personality_trait", "fallback_bare_trait_noun")
+    return _finalize("personality_trait", "fallback_bare_trait_noun", category)
 
 
-def _finalize(facet_type: str, rule_name: str) -> Classification:
+def _finalize(facet_type: str, rule_name: str,
+              category: str | None = None) -> Classification:
     observable = facet_type in _OBSERVABLE
-    if facet_type in _HIGH_SENSITIVITY:
+    # A special category always forces high sensitivity, whatever the type says.
+    # This is what catches 'Kink-interest diversity', which the type-derived
+    # scale rated 'low' because it looks like an ordinary personality trait.
+    if category is not None:
+        sensitivity = "high"
+    elif facet_type in _HIGH_SENSITIVITY:
         sensitivity = "high"
     elif facet_type in _MEDIUM_SENSITIVITY:
         sensitivity = "medium"
@@ -306,4 +317,5 @@ def _finalize(facet_type: str, rule_name: str) -> Classification:
         sensitivity=sensitivity,
         abstention_reason=None if observable else _ABSTENTION_REASON[facet_type],
         classification_rule=rule_name,
+        special_category=category,
     )

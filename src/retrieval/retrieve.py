@@ -34,6 +34,7 @@ class Candidate:
     conversation_observable: bool
     abstention_reason: str | None
     sensitivity: str
+    special_category: str | None
     scoring_definition: str
     score_anchors: str
     retrieval_score: float
@@ -45,6 +46,7 @@ class RoutedFacets:
 
     scorable: list[Candidate]      # -> Gate 3 (the LLM)
     gated_out: list[Candidate]     # -> deterministic not_observable, no LLM call
+    policy_blocked: list[Candidate]  # -> refused by policy, no LLM call
     top_k: int
 
 
@@ -57,6 +59,7 @@ def _to_candidate(row: dict, score: float) -> Candidate:
         conversation_observable=row["conversation_observable"],
         abstention_reason=reason,
         sensitivity=row["sensitivity"],
+        special_category=row.get("special_category") or None,
         scoring_definition=row["scoring_definition"],
         score_anchors=row["score_anchors"],
         retrieval_score=round(float(score), 4),
@@ -76,13 +79,25 @@ def retrieve(conversation: str, index: FacetIndex | None = None,
     return [_to_candidate(index.rows[i], scores[i]) for i in top]
 
 
-def route(conversation: str, index: FacetIndex | None = None,
-          top_k: int = 25) -> RoutedFacets:
-    """Gate 1 then Gate 2. Only `scorable` may reach the LLM."""
+def route(conversation: str, index: FacetIndex | None = None, top_k: int = 25,
+          allow_sensitive: bool = False) -> RoutedFacets:
+    """Gate 1, then Gate 2, then Gate 2b. Only `scorable` may reach the LLM.
+
+    Gate 2b (policy) runs AFTER observability because the two refusals mean
+    different things and should be reported separately: `not_observable` says
+    the conversation cannot evidence the facet, `policy_blocked` says it might
+    well be inferable and we decline to infer it anyway.
+    """
     candidates = retrieve(conversation, index=index, top_k=top_k)
-    scorable = [c for c in candidates if c.conversation_observable]
     gated_out = [c for c in candidates if not c.conversation_observable]
-    return RoutedFacets(scorable=scorable, gated_out=gated_out, top_k=top_k)
+    observable = [c for c in candidates if c.conversation_observable]
+
+    if allow_sensitive:
+        return RoutedFacets(observable, gated_out, [], top_k)
+
+    scorable = [c for c in observable if c.special_category is None]
+    blocked = [c for c in observable if c.special_category is not None]
+    return RoutedFacets(scorable, gated_out, blocked, top_k)
 
 
 def near_duplicates(index: FacetIndex | None = None,

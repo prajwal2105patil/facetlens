@@ -14,6 +14,7 @@ report rather than looking like a clean run.
 from __future__ import annotations
 
 from ..retrieval.embed import FacetIndex
+from ..preprocessing.sensitivity import policy_reason
 from ..retrieval.retrieve import Candidate, route
 from .backends import LLMBackend, get_backend
 from .parser import error_verdict, parse_batch, to_facet_verdict
@@ -41,6 +42,21 @@ def _gate_verdict(candidate: Candidate) -> FacetVerdict:
             f"Establishing it needs evidence outside the transcript."
         ),
         origin="observability_gate",
+        retrieval_score=candidate.retrieval_score,
+    )
+
+
+def _policy_verdict(candidate: Candidate) -> FacetVerdict:
+    """Gate 2b: refuse to infer special-category data. No LLM call."""
+    return FacetVerdict(
+        facet_id=candidate.facet_id,
+        facet=candidate.facet,
+        facet_type=candidate.facet_type,
+        status=Status.POLICY_BLOCKED,
+        score=None,
+        confidence=GATE_CONFIDENCE,
+        reason=policy_reason(candidate.special_category or "special category"),
+        origin="policy_gate",
         retrieval_score=candidate.retrieval_score,
     )
 
@@ -83,12 +99,15 @@ def score_conversation(conversation: str, *, conversation_id: str = "adhoc",
                        backend_name: str = "ollama",
                        model: str = "qwen2.5:7b-instruct",
                        backend: LLMBackend | None = None,
-                       index: FacetIndex | None = None) -> ConversationResult:
-    """Run all three gates over one conversation."""
+                       index: FacetIndex | None = None,
+                       allow_sensitive: bool = False) -> ConversationResult:
+    """Run every gate over one conversation."""
     backend = backend or get_backend(backend_name, model)
-    routed = route(conversation, index=index, top_k=top_k)
+    routed = route(conversation, index=index, top_k=top_k,
+                   allow_sensitive=allow_sensitive)
 
     verdicts = [_gate_verdict(c) for c in routed.gated_out]
+    verdicts += [_policy_verdict(c) for c in routed.policy_blocked]
     for batch in _chunk(routed.scorable, batch_size):
         verdicts.extend(score_batch(conversation, batch, backend))
 

@@ -219,3 +219,60 @@ def test_reference_labels_are_well_formed():
 
 def test_preprocessing_is_deterministic():
     assert build_records(read_raw()) == build_records(read_raw())
+
+
+# ------------------------------------------------------- special-category policy
+@pytest.mark.parametrize("raw,category", [
+    ("Kink-interest diversity", "sex_life_or_orientation"),
+    ("Holiness", "religious_or_philosophical_belief"),
+    ("Ethnocentrism", "racial_or_ethnic_origin"),
+    ("Liberalism", "political_opinion"),
+    ("FSH level", "genetic_or_biometric"),
+])
+def test_special_categories_are_detected(raw, category):
+    from src.preprocessing.sensitivity import special_category
+    assert special_category(raw) == category
+
+
+@pytest.mark.parametrize("raw", [
+    "Value orientation: Universalism",   # 'orientation' is not sex life
+    "Patient care orientation",
+    "Neuroticism",                       # a Big Five trait, not a health record
+    "Delegation skills",
+    "Talkativeness",
+])
+def test_ordinary_facets_are_not_special_category(raw):
+    from src.preprocessing.sensitivity import special_category
+    assert special_category(raw) is None
+
+
+def test_special_category_forces_high_sensitivity():
+    """A trait-looking facet must not stay 'low' just because its type is."""
+    result = classify(normalize_facet("Kink-interest diversity"))
+    assert result.special_category == "sex_life_or_orientation"
+    assert result.sensitivity == "high"
+
+
+def test_policy_gate_blocks_special_category_before_the_llm():
+    from src.retrieval.embed import build_index
+    from src.scoring.scorer import score_conversation
+
+    text = "I meditate every morning and I lean pretty liberal politically."
+    result = score_conversation(text, top_k=10, batch_size=5,
+                                backend=MockBackend(mode="valid"),
+                                index=build_index())
+    blocked = [v for v in result.verdicts if v.status == Status.POLICY_BLOCKED]
+    assert blocked, "special-category facets must be refused by default"
+    assert all(v.origin == "policy_gate" and v.score is None for v in blocked)
+    # A refused facet must never also appear as a score.
+    assert not ({v.facet_id for v in blocked} & {v.facet_id for v in result.scored})
+
+
+def test_allow_sensitive_is_an_explicit_opt_in():
+    from src.retrieval.embed import build_index
+    from src.retrieval.retrieve import route
+
+    text = "I meditate every morning and I lean pretty liberal politically."
+    index = build_index()
+    assert route(text, index, top_k=10).policy_blocked
+    assert not route(text, index, top_k=10, allow_sensitive=True).policy_blocked

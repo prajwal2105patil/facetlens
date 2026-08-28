@@ -25,11 +25,14 @@ class Status(StrEnum):
     SCORED = "scored"
     NOT_OBSERVABLE = "not_observable"
     INSUFFICIENT_EVIDENCE = "insufficient_evidence"
+    #: Could plausibly be inferred, but we refuse to. See sensitivity.py.
+    POLICY_BLOCKED = "policy_blocked"
     ERROR = "error"
 
 
 #: Which gate produced a verdict. Makes the failure analysis attributable.
-Origin = Literal["observability_gate", "llm", "evidence_verifier", "parser"]
+Origin = Literal["observability_gate", "policy_gate", "llm",
+                 "evidence_verifier", "parser"]
 
 
 class ModelVerdict(BaseModel):
@@ -118,7 +121,8 @@ class ConversationResult(BaseModel):
     def abstained(self) -> list[FacetVerdict]:
         return [
             v for v in self.verdicts
-            if v.status in (Status.NOT_OBSERVABLE, Status.INSUFFICIENT_EVIDENCE)
+            if v.status in (Status.NOT_OBSERVABLE, Status.INSUFFICIENT_EVIDENCE,
+                            Status.POLICY_BLOCKED)
         ]
 
     @property

@@ -33,6 +33,7 @@ COLUMNS = [
     "facet_type",
     "conversation_observable",
     "sensitivity",
+    "special_category",
     "abstention_reason",
     "scoring_definition",
     "score_anchors",

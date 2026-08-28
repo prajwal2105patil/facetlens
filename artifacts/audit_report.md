@@ -152,9 +152,9 @@ misclassification.
 
 | value | count | share |
 |---|---:|---:|
-| `low` | 313 | 78.4% |
-| `medium` | 55 | 13.8% |
-| `high` | 31 | 7.8% |
+| `low` | 286 | 71.7% |
+| `high` | 74 | 18.5% |
+| `medium` | 39 | 9.8% |
 
 ## 7. Known limitations of this audit
 

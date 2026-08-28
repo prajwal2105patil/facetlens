@@ -90,6 +90,7 @@ def cmd_score(args: argparse.Namespace) -> int:
         batch_size=args.batch_size,
         backend_name=args.backend,
         model=args.model,
+        allow_sensitive=args.allow_sensitive,
     )
     print(json.dumps(result.model_dump(mode="json"), indent=2, ensure_ascii=False))
     return 0
@@ -104,6 +105,7 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
         backend_name=args.backend,
         model=args.model,
         limit=args.limit,
+        allow_sensitive=args.allow_sensitive,
     )
     print(f"Wrote {report_path}")
     return 0
@@ -137,6 +139,8 @@ def build_parser() -> argparse.ArgumentParser:
                        help="facets per LLM scoring call")
         p.add_argument("--backend", default="ollama", choices=["ollama", "mock"])
         p.add_argument("--model", default="qwen2.5:7b-instruct")
+        p.add_argument("--allow-sensitive", action="store_true",
+                       help="override the GDPR Art.9 policy gate (evaluation only)")
 
     p_score = sub.add_parser("score", help="score a single conversation")
     p_score.add_argument("--text", required=True)
