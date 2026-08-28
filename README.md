@@ -253,10 +253,13 @@ finding that actually matters.
 
 ## Limitations
 
-1. **The taxonomy is heuristic.** Keyword and pattern rules, no training, no
-   human labelling pass. ~27% of rows depend on a fallback default. Two real
-   misclassifications were found and fixed during testing (DEBUGGING.md #5, #6);
-   others certainly remain.
+1. **The taxonomy is heuristic, and it has a measured error rate.** Keyword and
+   pattern rules, no training. A seeded 30-row manual review found **4
+   misclassifications (13.3%), all in the dangerous direction** - marked
+   observable when they were not (DEBUGGING.md #7). They were fixed, but that
+   sample can no longer estimate the post-fix rate, and ~27% of rows still
+   depend on a fallback default. Assume roughly a 10% observability error rate
+   until a fresh sample says otherwise.
 2. **Retrieval recall is poor** - 63% at K=25 on facets that should be scored.
    This is the single biggest weakness.
 3. **Confidence is not calibrated.** LLM confidence is self-reported. The report
@@ -358,5 +361,5 @@ artifacts/           audit report, benchmark report, LLM cache
 ```
 
 `DECISIONS.md` - 9 non-trivial decisions with trade-offs.
-`DEBUGGING.md` - 6 real issues, each with symptom, root cause, fix, verification.
+`DEBUGGING.md` - 7 real issues, each with symptom, root cause, fix, verification.
 `PROMPT_LOG.md` - how AI was used, and four concrete things it got wrong.

@@ -192,3 +192,55 @@ to prevent, and it was caught by *looking at the routing output* rather than by
 reading the ruleset. It is also honest evidence that the taxonomy is heuristic:
 this one was found, and others are certainly still there. That is why the
 benchmark measures false abstentions instead of assuming the gate is perfect.
+
+---
+
+## #7. The spot-check I had promised but not yet run found a 13% error rate
+
+**Symptom.** No symptom - that is the point. `audit_report.md` had a section
+promising a seeded 30-row manual review, and its text said "reviewed by hand;
+see README for the resulting disagreement count". The review had not actually
+been performed. The claim was written before the work.
+
+**Diagnosis.** Performed it properly: printed all 30 sampled rows (seed 42) and
+judged each one's observability verdict by hand.
+
+**Result: 4 of 30 wrong (13.3%), and every single one in the dangerous
+direction** - classified observable when they are not, so all four would have
+been sent to the LLM and scored:
+
+| row | classified as | reality |
+|---|---|---|
+| `Sense-of-coherence score` | `personality_trait`, observable | Antonovsky SOC instrument output |
+| `Psychological construct: Eye-Contact avoidance score` | `communication_style`, observable | instrument output - and eye contact is not present in *text* at all |
+| `Honesty-humility trait score` | `motivation_value`, observable | HEXACO instrument output |
+| `Ethical leadership rating` | `interpersonal`, observable | a rating, typically by third-party raters |
+
+**Root cause.** One shared blind spot: the words `score`, `rating` and `scale`
+were never treated as non-observability signals. Every one of these is an
+*instrument output* - produced by administering a questionnaire or by external
+raters - and no amount of conversation can produce one. The rules had been
+written around subject matter (medical, biometric, demographic) and completely
+missed the *measurement-artefact* category cutting across all of them.
+
+**Fix.** Added the `psychometric_instrument_output` rule and a corresponding
+`psychometric_instrument_score` type, placed after the cognitive-test rules so
+the cognitive distinction survives.
+
+**Verification.** All four now gate correctly; `Sportsmanship rating` was caught
+as a bonus. Observable rows 245 -> 235. Legitimately observable facets
+(`Happiness`, `Delegation skills`, `Collaboration`, `Irritability`,
+`Orderliness`) were checked and are unaffected, so this is not over-correction.
+No reference label broke, and all 38 tests pass.
+
+**The caveat that matters.** Having driven the fix, this sample is no longer an
+unbiased estimator - its post-fix error count is 0 by construction and quoting
+that would be meaningless. The honest number is the pre-fix **4/30**, which
+suggests a real observability error rate around 10%. A fresh seed is needed for
+a post-fix estimate, and that is listed as remaining work rather than claimed.
+
+**What this really says.** The most valuable audit finding in this project came
+from doing a boring thing I had already written down as done. It is also a
+reminder that the observability gate is only as good as the taxonomy behind it -
+which is exactly why DECISIONS.md D1 accepts false abstentions as the price of
+never inventing a score.
