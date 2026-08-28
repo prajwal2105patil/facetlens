@@ -28,8 +28,18 @@ os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 ENRICHED_CSV = Path("data/processed/enriched_facets.csv")
 CACHE_DIR = Path("artifacts/embeddings")
-MATRIX_PATH = CACHE_DIR / "facet_matrix.npy"
-META_PATH = CACHE_DIR / "facet_matrix.meta.json"
+
+
+def _cache_paths(text_column: str) -> tuple[Path, Path]:
+    """One cache slot per retrieval-text variant.
+
+    The ablation builds an index over a different column; sharing a single path
+    would make the two variants evict each other on every alternation. The
+    fingerprint check keeps that *correct* either way, but it wastes a full
+    rebuild each time.
+    """
+    stem = f"facet_matrix__{text_column}"
+    return CACHE_DIR / f"{stem}.npy", CACHE_DIR / f"{stem}.meta.json"
 
 
 @dataclass
@@ -103,11 +113,12 @@ def build_index(force: bool = False, model_name: str = EMBED_MODEL,
     rows = load_enriched()
     texts = [row[text_column] for row in rows]
     fingerprint = _fingerprint(texts, f"{model_name}:{text_column}")
+    matrix_path, meta_path = _cache_paths(text_column)
 
-    if not force and MATRIX_PATH.exists() and META_PATH.exists():
-        meta = json.loads(META_PATH.read_text(encoding="utf-8"))
+    if not force and matrix_path.exists() and meta_path.exists():
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
         if meta.get("fingerprint") == fingerprint:
-            matrix = np.load(MATRIX_PATH)
+            matrix = np.load(matrix_path)
             if matrix.shape[0] == len(rows):
                 return FacetIndex([r["facet_id"] for r in rows], rows, matrix)
 
@@ -117,8 +128,8 @@ def build_index(force: bool = False, model_name: str = EMBED_MODEL,
     ).astype(np.float32)
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    np.save(MATRIX_PATH, matrix)
-    META_PATH.write_text(
+    np.save(matrix_path, matrix)
+    meta_path.write_text(
         json.dumps(
             {
                 "fingerprint": fingerprint,
