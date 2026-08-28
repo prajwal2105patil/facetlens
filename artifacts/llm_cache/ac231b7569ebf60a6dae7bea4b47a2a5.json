@@ -1,0 +1,11 @@
+{
+  "model": "qwen2.5:7b-instruct",
+  "options": {
+    "temperature": 0.0,
+    "seed": 42,
+    "num_ctx": 4096
+  },
+  "system": "You write short, natural first-person utterances that would appear in a real\nconversation and would be evidence of a given behavioural facet.\n\nRules:\n- 2 utterances per facet, each one sentence, under 15 words.\n- Describe concrete behaviour or a concrete statement. Never name the facet.\n- Write how people actually talk, not how a questionnaire is worded.\n- For facets that could only be established by a test, a lab result, a record\n  or a diagnosis, write what someone would say when REPORTING that fact.\n\nReturn JSON only: {\"expansions\": [{\"facet_id\": \"...\", \"utterances\": [\"...\", \"...\"]}]}",
+  "user": "Write utterances for these facets:\n\n- facet_id=F0034 | Desperation (emotional state)\n- facet_id=F0035 | Affiliation Motivation (instrument or scale header)\n- facet_id=F0036 | Anatomy knowledge (cognitive test ability)\n- facet_id=F0037 | Passive-Aggressive (personality trait)\n- facet_id=F0038 | Presence of Spiritual Pain (clinical mental health)\n- facet_id=F0039 | Role of Spirituality in Community Involvement (spiritual religious disposition)\n- facet_id=F0040 | Structure (behavioral tendency)\n- facet_id=F0041 | Eco-tourism trips (preference lifestyle)",
+  "response": "{\"expansions\": [{\"facet_id\": \"F0034\", \"utterances\": [\"I really need that job.\", \"I can't lose this deal.\"]}, {\"facet_id\": \"F0035\", \"utterances\": [\"Wants to be part of the group.\", \"Always looking for friends.\"]}, {\"facet_id\": \"F0036\", \"utterances\": [\"Knows all about bones.\", \"Studied anatomy last semester.\"]}, {\"facet_id\": \"F0037\", \"utterances\": [\"Said 'Sure, no problem' but didn't do it.\", \"Complained about the task but did it anyway.\"]}, {\"facet_id\": \"F0038\", \"utterances\": [\"Feels like something's missing in my life.\", \"Sometimes I feel like I'm not connected to anything.\"]}, {\"facet_id\": \"F0039\", \"utterances\": [\"Spirituality is important for community service.\", \"Volunteers at the church every Sunday.\"]}, {\"facet_id\": \"F0040\", \"utterances\": [\"Likes everything in its place.\", \"Always tidies up after himself.\"]}, {\"facet_id\": \"F0041\", \"utterances\": [\"Takes eco-tours whenever possible.\", \"Prefers nature tours over city ones.\"]}]}"
+}

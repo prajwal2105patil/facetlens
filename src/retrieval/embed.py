@@ -120,12 +120,31 @@ def _load_model(model_name: str):
 
 
 def build_index(force: bool = False, model_name: str = EMBED_MODEL,
-                text_column: str = "retrieval_text") -> FacetIndex:
-    """Return the facet index, rebuilding the embedding cache only if stale."""
+                text_column: str = "retrieval_text",
+                use_expansions: bool = True) -> FacetIndex:
+    """Return the facet index, rebuilding the embedding cache only if stale.
+
+    When `use_expansions` is on and generated example utterances exist, they are
+    appended to each facet's retrieval text before embedding. See
+    `retrieval/expand.py` for why: facet names are abstract labels and
+    conversations are concrete narrative, and no encoder bridges that on its
+    own. The expansions are data, cached on disk and committed.
+    """
     rows = load_enriched()
     texts = [row[text_column] for row in rows]
-    fingerprint = _fingerprint(texts, f"{model_name}:{text_column}")
-    matrix_path, meta_path = _cache_paths(text_column)
+
+    variant = text_column
+    if use_expansions and text_column == "retrieval_text":
+        from .expand import CACHE, expanded_text
+
+        if CACHE.exists():
+            expansions = json.loads(CACHE.read_text(encoding="utf-8"))
+            if expansions:
+                texts = [expanded_text(row, expansions) for row in rows]
+                variant = "retrieval_text_expanded"
+
+    fingerprint = _fingerprint(texts, f"{model_name}:{variant}")
+    matrix_path, meta_path = _cache_paths(variant)
 
     if not force and matrix_path.exists() and meta_path.exists():
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -147,7 +166,7 @@ def build_index(force: bool = False, model_name: str = EMBED_MODEL,
             {
                 "fingerprint": fingerprint,
                 "model": model_name,
-                "text_column": text_column,
+                "text_column": variant,
                 "n_facets": len(rows),
                 "dim": int(matrix.shape[1]),
             },

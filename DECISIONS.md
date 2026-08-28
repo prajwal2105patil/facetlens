@@ -233,3 +233,70 @@ regenerates it live.
 live path, which is why `--backend mock` and the test suite exercise the code
 independently of the cache, and why the cache key includes the schema content
 so a contract change cannot silently reuse stale responses.
+
+---
+
+## D10. Rejecting three retrieval "improvements" on measurement
+
+**Problem.** Retrieval was the weakest component: 63% recall on facets that
+should be scored, at K=25. Three standard fixes suggested themselves.
+
+**Measured, all three:**
+
+| approach | recall@25 (should-score) |
+|---|---|
+| MiniLM dense, enriched text (incumbent) | **12/19 (63%)** |
+| BM25 lexical, with suffix normalisation | 2/19 (11%) |
+| dense + BM25, reciprocal rank fusion | 10/19 (53%) |
+| BGE-small-en-v1.5 (stronger public benchmarks) | 10/19 (53%) |
+| BGE-small + its recommended query prefix | 9/19 (47%) |
+
+**Choice: ship none of them.** Every alternative was worse. BM25 is close to
+useless here because conversations describe behaviour while facets are abstract
+labels, so there is almost no lexical overlap to exploit. Fusion then drags a
+strong signal down with a near-random one. And a "better" encoder was worse,
+which is the result that mattered most - it ruled out the encoder as the
+problem.
+
+**Trade-off.** Three implementations of which only one shipped, and it shipped
+disabled. The BM25 module stays in the tree as an ablation arm rather than
+being deleted, because the negative result is the evidence for D11.
+
+**What it bought.** Eliminating the encoder and the similarity function as
+causes is what identified the real one: an abstract label and a concrete
+narrative do not occupy the same region of *any* embedding space. That is a
+property of the task, not of the tooling, and it needs a different kind of fix.
+
+---
+
+## D11. Document expansion, generated once and committed as data
+
+**Problem.** Given D10, the fix has to change what is *indexed*, not how it is
+compared.
+
+**Options.** (a) hand-write example phrasings for 399 facets; (b) generate them
+with the LLM once and cache; (c) query-side expansion (HyDE) at run time;
+(d) accept the recall ceiling.
+
+**Choice: (b).** Each facet is indexed as its enriched text plus two generated
+first-person utterances that would evidence it. Validated by hand before
+building: appending examples to three facets moved their rank against a
+leadership conversation from 7->2, 7->2 and 9->3.
+
+(c) was rejected because it adds an LLM call to every query - on a machine
+generating 8 tokens/second, that is the whole latency budget - while (b) is
+paid once, offline, and cached.
+
+**Guarding against leakage.** The generator sees a facet's name, type and
+definition and nothing else. It never sees a benchmark conversation or a
+reference label. Expansions were generated for **all 399 facets**, not only the
+observable ones, because expanding only the observable half would confound the
+result: recall could improve merely by demoting non-observable facets rather
+than by surfacing the right ones.
+
+**Trade-off.** A one-time generation cost (~45 minutes on this CPU) and a new
+failure surface: a bad expansion actively harms retrieval for that facet, and
+nothing validates the generated utterances beyond their being cached as
+inspectable, committed data. At 5,000 facets this cost scales linearly and
+would want batching on a GPU or a hosted endpoint - but it remains a one-off,
+not a per-query cost.
