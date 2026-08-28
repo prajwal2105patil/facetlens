@@ -1,0 +1,11 @@
+{
+  "model": "qwen2.5:7b-instruct",
+  "options": {
+    "temperature": 0.0,
+    "seed": 42,
+    "num_ctx": 4096
+  },
+  "system": "You write short, natural first-person utterances that would appear in a real\nconversation and would be evidence of a given behavioural facet.\n\nRules:\n- 2 utterances per facet, each one sentence, under 15 words.\n- Describe concrete behaviour or a concrete statement. Never name the facet.\n- Write how people actually talk, not how a questionnaire is worded.\n- For facets that could only be established by a test, a lab result, a record\n  or a diagnosis, write what someone would say when REPORTING that fact.\n\nReturn JSON only: {\"expansions\": [{\"facet_id\": \"...\", \"utterances\": [\"...\", \"...\"]}]}",
+  "user": "Write utterances for these facets:\n\n- facet_id=F0187 | Frankness (communication style)\n- facet_id=F0188 | Psychological Safety climate (behavioral tendency)\n- facet_id=F0189 | Self-Compassion total (interpersonal)\n- facet_id=F0190 | Executive-Function composite (personality trait)\n- facet_id=F0191 | Rebelliousness (behavioral tendency)\n- facet_id=F0192 | Volunteer Work (personality trait)\n- facet_id=F0193 | Intellect (cognitive style)\n- facet_id=F0194 | Use of Mathematical Formulas (cognitive test ability)",
+  "response": "{\"expansions\": [{\"facet_id\": \"F0187\", \"utterances\": [\"I'm totally honest about my feelings.\", \"You can count on me to be upfront.\"]}, {\"facet_id\": \"F0188\", \"utterances\": [\"We feel safe sharing our ideas here.\", \"There's no fear of judgment around here.\"]}, {\"facet_id\": \"F0189\", \"utterances\": [\"I'm kind to myself when things go wrong.\", \"It's okay, I forgive myself.\"]}, {\"facet_id\": \"F0190\", \"utterances\": [\"I plan my day well.\", \"I stay organized and focused.\"]}, {\"facet_id\": \"F0191\", \"utterances\": [\"I challenge authority sometimes.\", \"I don't always follow the rules.\"]}, {\"facet_id\": \"F0192\", \"utterances\": [\"I like helping out at community events.\", \"I enjoy volunteering my time.\"]}, {\"facet_id\": \"F0193\", \"utterances\": [\"I love solving complex puzzles.\", \"Logic is my favorite part of games.\"]}, {\"facet_id\": \"F0194\", \"utterances\": [\"I used the quadratic formula to solve that problem.\", \"The test was easy, I just applied what I know.\"]}]}"
+}

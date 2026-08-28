@@ -1,10 +1,13 @@
-"""Ablation: what does the enriched retrieval text actually buy?
+"""Ablation over five retrieval configurations.
 
-Compares two retrieval-text choices on the same reference set, same embedding
-model, same K values:
+Retrieval was the weakest measured component of this system, so four separate
+interventions were built to fix it. This module measures all of them on the
+same reference set, same embedding model, same K values. The headline result is
+negative: none of them materially improved recall.
 
-    bare      facet_normalized                                  ("FSH level")
-    enriched  facet_normalized + facet_type + scoring_definition
+Keeping the losing arms in the tree is deliberate. A rejected experiment with
+numbers attached is evidence; a deleted one is just an unsupported claim in a
+decision log.
 
 Recall is reported split by what the reference set expects, because the two
 directions mean opposite things:
@@ -139,13 +142,30 @@ def run() -> Path:
         "",
         "## What each attempt was worth",
         "",
-        f"At K=25, the shipped configuration retrieves **{at25[0]}/{at25[1]}** of "
+        f"At K=25 the shipped configuration retrieves **{at25[0]}/{at25[1]}** of "
         f"should-score facets against **{at25[2]}/{at25[1]}** for the previous "
-        "default.",
+        "default. **That is not an improvement.**",
         "",
-        "**Three of the four alternatives made retrieval worse and were not "
-        "shipped.** They are kept here because a rejected experiment with "
-        "numbers attached is more useful than a clean-looking report:",
+        "Document expansion ties the incumbent at K=10, 15, 25 and 60, and gains "
+        "exactly one facet at K=40 and K=100. It is shipped because it never "
+        "loses, not because it works. The honest summary is that **four "
+        "different retrieval interventions were built and measured, and none of "
+        "them materially moved recall.**",
+        "",
+        "**Why expansion underdelivered.** The idea was validated by hand first: "
+        "appending example utterances to three facets moved their rank against a "
+        "leadership conversation from 7->2, 7->2 and 9->3. But those examples "
+        "were written by a person who had already read the target conversation. "
+        "The shipped expansions are generated blind from a facet definition "
+        "alone, which is the only honest setup and a much harder one - the "
+        "generated utterance for `Collaboration` is *\"I enjoy working in "
+        "teams\"*, which is a perfectly good example and still nothing like "
+        "*\"we worked through it together until we had something everyone could "
+        "live with\"*. The hand test measured the ceiling, not the method.",
+        "",
+        "**The other three made retrieval worse.** They are kept here because a "
+        "rejected experiment with numbers attached is more useful than a "
+        "clean-looking report:",
         "",
         "- **BM25 alone** is close to useless on this catalogue. Conversations "
         "describe behaviour (*'I assigned tasks based on their strengths'*) "
@@ -159,22 +179,33 @@ def run() -> Path:
         "here because it needs a second model download; the measurement is "
         "recorded in DECISIONS.md D10.",
         "",
-        "Those three failures are what identified the real problem. The "
-        "bottleneck was never the encoder or the similarity function - it is "
-        "that an abstract label and a concrete narrative do not occupy the same "
-        "region of any embedding space. Document expansion attacks that "
-        "directly by making each facet look more like the conversations that "
-        "should match it.",
+        "Those failures did localise the problem, even though none of them "
+        "solved it. The bottleneck is not the encoder, the similarity function, "
+        "or the indexed text: swapping each in turn changed almost nothing. "
+        "What remains is the task itself - a short abstract label and a long "
+        "concrete narrative are far apart in every representation tried here, "
+        "and closing that gap needs something with more capacity than a "
+        "bi-encoder. A cross-encoder reranker over a wide candidate set (K=100, "
+        "where recall reaches 89%) is the obvious next thing to try and is the "
+        "top item in README's next steps. It was not attempted here because it "
+        "adds a second model to the inference path on a machine already running "
+        "at 8 tokens/second.",
         "",
         "## Honesty notes",
         "",
         "- The expansions are generated from a facet's **name, type and "
         "definition only**. The generator never sees a benchmark conversation "
         "or a reference label, so this is not test-set leakage.",
-        "- Expansions were generated for **all 399 facets**, not only the "
-        "observable ones. Expanding only the observable half would have "
+        "- Expansions were generated for the whole catalogue, not only the "
+        "observable half. Expanding only the observable rows would have "
         "confounded the result: recall could have improved merely by demoting "
         "non-observable facets rather than by promoting the right ones.",
+        "- **366 of 399 facets** actually received expansions. 33 were dropped "
+        "by batches whose response omitted some requested facets - the same "
+        "omission failure the scorer handles with explicit ERROR verdicts. "
+        "Those 33 fall back to their un-expanded text, and the generator is "
+        "resumable, so a re-run would fill them. Given the measured effect "
+        "size, completing them would not change the conclusion.",
         "- The reference set is 55 pairs, 19 of which expect a score. Single-"
         "facet changes move these percentages by ~5 points, so treat small "
         "differences between arms as noise.",

@@ -283,28 +283,1184 @@
     "I figured out it was 15% off, easy peasy.",
     "If I buy two, they say I save $2.50 each."
   ],
+  "F0090": [
+    "I was diagnosed with insomnia.",
+    "The doctor said I have sleep apnea."
+  ],
+  "F0091": [
+    "I really listen when people talk.",
+    "I try to understand what they mean."
+  ],
   "F0092": [
     "I enjoy working in teams.",
     "We collaborate a lot on projects here."
+  ],
+  "F0093": [
+    "I can write neatly.",
+    "My handwriting is pretty good."
+  ],
+  "F0094": [
+    "I'm not afraid to speak up in groups.",
+    "I volunteer a lot in meetings."
+  ],
+  "F0095": [
+    "I remember the grocery list well.",
+    "I rarely forget where I put my keys."
+  ],
+  "F0096": [
+    "I'm good at typing quickly.",
+    "My coordination is pretty good."
+  ],
+  "F0097": [
+    "I keep a very organized desk.",
+    "Everything in my house has its place."
+  ],
+  "F0098": [
+    "I have 5 certificates on my wall.",
+    "I've taken 3 courses online recently."
+  ],
+  "F0099": [
+    "I've got a few tricks up my sleeve.",
+    "There's more to me than meets the eye."
+  ],
+  "F0100": [
+    "I'm really into Japanese culture.",
+    "My parents are from Mexico, but I grew up here."
+  ],
+  "F0101": [
+    "I love learning for its own sake.",
+    "Reading is my favorite way to relax and recharge."
+  ],
+  "F0102": [
+    "I try not to let personal feelings cloud my judgment.",
+    "It's important to be fair in all situations."
+  ],
+  "F0103": [
+    "I've been feeling really drained lately.",
+    "Work has just been too much, I think I'm burning out."
+  ],
+  "F0104": [
+    "I try to live a simple life.",
+    "Being close to nature is important to me."
+  ],
+  "F0105": [
+    "I always plan ahead for exams.",
+    "I make sure I get enough sleep every night."
+  ],
+  "F0106": [
+    "I set goals and work towards them.",
+    "I like to take charge of my own life."
+  ],
+  "F0107": [
+    "I always encourage everyone to share their ideas.",
+    "Let's all participate, okay?"
+  ],
+  "F0108": [
+    "My ideas are usually pretty out there.",
+    "I think we should try this crazy new software."
+  ],
+  "F0109": [
+    "I always make sure to finish my projects on time.",
+    "I never miss a deadline, no matter what."
+  ],
+  "F0110": [
+    "I analyze data by looking for patterns and trends.",
+    "I use statistical methods to interpret the numbers."
+  ],
+  "F0111": [
+    "I'm really good at networking with people.",
+    "I enjoy organizing social events."
+  ],
+  "F0112": [
+    "Sometimes I get paranoid and suspicious of others.",
+    "I have these weird thoughts that make me feel uncomfortable."
+  ],
+  "F0113": [
+    "My ethical leadership score is 85 out of 100.",
+    "I scored high on the ethics section of the test."
+  ],
+  "F0114": [
+    "I'm not really in the mood to do much today.",
+    "I've been feeling pretty lazy lately."
+  ],
+  "F0115": [
+    "I'm feeling really happy today.",
+    "I'm just not in a great mood."
+  ],
+  "F0116": [
+    "I feel pretty satisfied with my life.",
+    "I'm not very content right now."
+  ],
+  "F0123": [
+    "I aced the filing test at work.",
+    "Got a perfect score on that number sorting task."
+  ],
+  "F0124": [
+    "Always volunteering for extra shifts, even when not needed.",
+    "People say I'm so dedicated it's almost annoying."
+  ],
+  "F0125": [
+    "My parathyroid hormone level is 3.5 ng/mL.",
+    "The doctor said my PTH levels are a bit high."
+  ],
+  "F0126": [
+    "Always asking if I did okay on the presentation.",
+    "Worried about what others think of me."
+  ],
+  "F0127": [
+    "I like to make decisions based on facts, not feelings.",
+    "When in doubt, I stick to logical reasoning."
+  ],
+  "F0128": [
+    "Love going to art museums and galleries.",
+    "Reading poetry is one of my favorite hobbies."
+  ],
+  "F0129": [
+    "Quickly learn new tasks without much practice.",
+    "I pick up on things fast, even if they're complex."
+  ],
+  "F0130": [
+    "Always striving to do better than others in my work.",
+    "Setting high goals for myself and working hard to achieve them."
+  ],
+  "F0131": [
+    "I always have something to complain about.",
+    "Why do they keep asking for my opinion?"
+  ],
+  "F0132": [
+    "I aced the material properties test today.",
+    "The book says steel has a higher tensile strength than aluminum."
+  ],
+  "F0133": [
+    "You really pissed me off with that comment.",
+    "Don't even think about cutting in line, got it?"
+  ],
+  "F0134": [
+    "I like to do things my own way.",
+    "No one can tell me what to do."
+  ],
+  "F0135": [
+    "I've been to 7 Sufi retreats this year.",
+    "Last month's retreat was amazing, very enlightening."
+  ],
+  "F0136": [
+    "My chromatin-accessibility score is 85%.",
+    "The lab results show my DNA is highly accessible."
+  ],
+  "F0137": [
+    "I scored a 9 on the humility test.",
+    "It's good to be humble, right?"
+  ],
+  "F0138": [
+    "My resonance level with hexagram 36 is at 4.",
+    "The I Ching says it’s time for change."
+  ],
+  "F0139": [
+    "I love hanging out with friends.",
+    "I'm always up for a fun night out."
+  ],
+  "F0140": [
+    "I need to talk to people all the time.",
+    "I feel lonely when I don't have anyone to chat with."
+  ],
+  "F0141": [
+    "I spend 5 hours a week working on group projects.",
+    "My collaboration hours are up to 6 per day."
+  ],
+  "F0142": [
+    "I enjoy reading poetry and history books.",
+    "I like going to art museums."
+  ],
+  "F0143": [
+    "I completed 3 cycles this year.",
+    "I finished my Quran khatams in March."
+  ],
+  "F0144": [
+    "I attend the Ridván celebration every year.",
+    "I participate in the festivities during Ridván."
+  ],
+  "F0145": [
+    "I always help out when someone needs it.",
+    "I feel bad if I can't assist others."
+  ],
+  "F0146": [
+    "I remember things pretty well, you know.",
+    "I'm good at recalling information."
+  ],
+  "F0147": [
+    "I maintained eye contact for 60% of the time.",
+    "My gaze was on you about half the talk."
+  ],
+  "F0148": [
+    "I feel like I know better than everyone else today.",
+    "It's obvious what the right thing to do is."
+  ],
+  "F0149": [
+    "I'm feeling pretty upbeat about this project.",
+    "Today just isn't my day, man."
+  ],
+  "F0150": [
+    "My serotonin levels are low today.",
+    "The doctor said I have a reduced availability of serotonin transporters."
+  ],
+  "F0151": [
+    "I contributed 3 ideas to the team's plan.",
+    "I helped draft half of our project proposal."
+  ],
+  "F0152": [
+    "Respecting everyone’s opinions is important to me.",
+    "I want to be seen as a valuable member here."
+  ],
+  "F0153": [
+    "We'll assess the pros and cons of each option.",
+    "Let's weigh the benefits against the drawbacks."
+  ],
+  "F0154": [
+    "I'd evaluate the risks before making a decision.",
+    "I like to consider all angles before choosing a solution."
+  ],
+  "F0155": [
+    "I really like trying new foods.",
+    "Always up for a challenge."
+  ],
+  "F0156": [
+    "Things are either black or white to me.",
+    "You can't mix apples and oranges."
+  ],
+  "F0157": [
+    "I did three Reiki sessions last year.",
+    "I usually do one session every six months."
+  ],
+  "F0158": [
+    "My rising sign is Scorpio, right?",
+    "Scorpio, got it."
+  ],
+  "F0159": [
+    "Read between the lines easily.",
+    "Great at reading people."
+  ],
+  "F0160": [
+    "Jumped in front of a car to save my kid.",
+    "Risked everything for a friend."
+  ],
+  "F0161": [
+    "Grew up on a farm in Iowa.",
+    "Always lived near the ocean."
+  ],
+  "F0162": [
+    "Can share anything with you.",
+    "Nothing private here."
+  ],
+  "F0163": [
+    "I get my eyes checked every year.",
+    "My doctor said I need a new prescription."
+  ],
+  "F0164": [
+    "I've never been in a fight before.",
+    "I was hit by someone once, it wasn't nice."
+  ],
+  "F0165": [
+    "My BMI is 28.5.",
+    "I weigh 190 pounds and stand 5'10\"."
+  ],
+  "F0166": [
+    "I love cooking Italian food.",
+    "I hate making the same dishes over and over."
+  ],
+  "F0167": [
+    "I speak three languages fluently.",
+    "Most of my friends are bilingual."
+  ],
+  "F0168": [
+    "I'm a hip-hop dancer, but I can do salsa too.",
+    "I've taken classes in ballet and contemporary dance."
+  ],
+  "F0169": [
+    "I try to be honest all the time.",
+    "I follow the principles of Satya."
+  ],
+  "F0170": [
+    "I think my culture is superior.",
+    "I believe in the superiority of our traditions."
+  ],
+  "F0171": [
+    "I feel really overwhelmed today.",
+    "Sometimes I get too emotional about small things."
+  ],
+  "F0172": [
+    "I came up with a totally new way to solve that problem.",
+    "Why do we always have to stick to the same old methods?"
+  ],
+  "F0173": [
+    "I scored 85 on my hope scale test.",
+    "I feel really optimistic about the future."
+  ],
+  "F0174": [
+    "I walked for an hour this morning during my meditation session.",
+    "I did a walking meditation for 45 minutes today."
+  ],
+  "F0175": [
+    "My doctor said I have mild depression.",
+    "I've been feeling pretty down lately."
+  ],
+  "F0176": [
+    "I aced the math test on concepts we covered last week.",
+    "I really understand those mathematical ideas now."
+  ],
+  "F0177": [
+    "My doctor said I'm showing signs of hypomania.",
+    "I've been feeling more energetic and less tired lately."
+  ],
+  "F0178": [
+    "I set a goal to save money for a vacation next year.",
+    "I’m really focused on my career goals right now."
+  ],
+  "F0179": [
+    "I feel really close to my family.",
+    "Connecting with friends makes me happy."
+  ],
+  "F0180": [
+    "I did well on the cognitive test.",
+    "The results showed I have a strong foundation."
+  ],
+  "F0181": [
+    "I meditated for 3 hours today.",
+    "I practiced ego dissolution twice this week."
+  ],
+  "F0182": [
+    "I always follow through with my plans.",
+    "Once I decide, I act quickly."
+  ],
+  "F0183": [
+    "I meditate 5 times a week.",
+    "Archon meditation is part of my routine."
+  ],
+  "F0184": [
+    "I’m a good example for others.",
+    "People often look up to me."
+  ],
+  "F0185": [
+    "I believe in doing what’s right.",
+    "Ethics guide my decisions."
+  ],
+  "F0186": [
+    "I don’t like being told what to do.",
+    "I prefer to make my own choices."
+  ],
+  "F0187": [
+    "I'm totally honest about my feelings.",
+    "You can count on me to be upfront."
+  ],
+  "F0188": [
+    "We feel safe sharing our ideas here.",
+    "There's no fear of judgment around here."
+  ],
+  "F0189": [
+    "I'm kind to myself when things go wrong.",
+    "It's okay, I forgive myself."
+  ],
+  "F0190": [
+    "I plan my day well.",
+    "I stay organized and focused."
+  ],
+  "F0191": [
+    "I challenge authority sometimes.",
+    "I don't always follow the rules."
+  ],
+  "F0192": [
+    "I like helping out at community events.",
+    "I enjoy volunteering my time."
+  ],
+  "F0193": [
+    "I love solving complex puzzles.",
+    "Logic is my favorite part of games."
+  ],
+  "F0194": [
+    "I used the quadratic formula to solve that problem.",
+    "The test was easy, I just applied what I know."
+  ],
+  "F0195": [
+    "I swear, it's the only way to get through to him.",
+    "She always uses big words even for simple things."
+  ],
+  "F0196": [
+    "He's really impulsive and doesn't think before acting.",
+    "She tends to be very methodical in everything she does."
+  ],
+  "F0197": [
+    "I get so upset when people cut me off while I'm talking.",
+    "He cries easily over little things that don't bother most people."
+  ],
+  "F0198": [
+    "I can only focus on one thing at a time, it's hard for me to multitask.",
+    "She switches between tasks really well and doesn't get distracted."
+  ],
+  "F0199": [
+    "My acculturative stress score is 45 out of 60.",
+    "I scored 32 on the acculturative stress scale, which is pretty high for me."
+  ],
+  "F0200": [
+    "He's not afraid to take risks and try new things.",
+    "She's always cautious and thinks twice before doing anything."
+  ],
+  "F0201": [
+    "He talks about the same thing over and over, never changes the subject.",
+    "She likes to jump from one topic to another really fast."
+  ],
+  "F0202": [
+    "I've been diagnosed with hysteria, it's affecting my life a lot.",
+    "The doctor said I have some hysterical tendencies but nothing severe."
+  ],
+  "F0203": [
+    "I shook the lulav for seven days.",
+    "We did it every day during Sukkot."
+  ],
+  "F0204": [
+    "I always use a simple structure when I talk.",
+    "My sentences are usually short and to the point."
+  ],
+  "F0205": [
+    "I really value my achievements at work.",
+    "Getting recognition for my efforts is important to me."
+  ],
+  "F0206": [
+    "I find it easy to explain how gears work.",
+    "Understanding machines comes naturally to me."
+  ],
+  "F0207": [
+    "I can remember the lyrics to that song easily.",
+    "I have a good memory for songs I hear."
+  ],
+  "F0208": [
+    "I love telling stories about my travels.",
+    "My friends always want me to share my adventures."
+  ],
+  "F0209": [
+    "I took piano lessons for ten years.",
+    "I played the piano for over a decade."
+  ],
+  "F0210": [
+    "I'm really warm towards everyone I meet.",
+    "I always try to make people feel welcome."
+  ],
+  "F0211": [
+    "I'm not really the type to brag.",
+    "It's all good, no big deal."
+  ],
+  "F0212": [
+    "Just tell it like it is.",
+    "You should have seen me on stage!"
+  ],
+  "F0213": [
+    "I keep my room at 68 degrees.",
+    "The perfect temperature for sleeping."
+  ],
+  "F0214": [
+    "Sorry, I missed a bit of that.",
+    "Could you repeat that, please?"
+  ],
+  "F0215": [
+    "I'm feeling really happy today.",
+    "Life is just perfect right now."
+  ],
+  "F0216": [
+    "I remember the first five items easily.",
+    "The rest takes a bit more effort."
+  ],
+  "F0217": [
+    "I'd rather not talk about it.",
+    "Let's just enjoy this moment."
+  ],
+  "F0218": [
+    "I practice yoga for two hours every week.",
+    "It helps me stay centered."
+  ],
+  "F0219": [
+    "I prefer things to stay the same.",
+    "Change makes me uncomfortable."
+  ],
+  "F0220": [
+    "I can adapt quickly to new situations.",
+    "Flexibility is key for me."
+  ],
+  "F0221": [
+    "I took a vow of silence for 3 months last year.",
+    "I've kept 5 vows this year."
+  ],
+  "F0222": [
+    "I'm really passionate about my work.",
+    "I love what I do."
+  ],
+  "F0223": [
+    "I enjoy classical music a lot.",
+    "I like modern art too."
+  ],
+  "F0224": [
+    "I delegate tasks to others.",
+    "I prefer to lead by example."
+  ],
+  "F0225": [
+    "I believe in doing the right thing, even if it's hard.",
+    "Consistency is important for me."
+  ],
+  "F0226": [
+    "I stick with projects until they're done.",
+    "Once I start something, I finish it."
+  ],
+  "F0227": [
+    "I think about my day a lot at night.",
+    "I often wonder why I act the way I do."
+  ],
+  "F0228": [
+    "I take deep breaths before reacting.",
+    "I count to ten when I’m upset."
+  ],
+  "F0229": [
+    "I try to understand different cultures better.",
+    "I ask a lot of questions about other people’s backgrounds."
+  ],
+  "F0230": [
+    "My metabolic rate is low, so I need to eat more often.",
+    "I have a high metabolism and burn calories quickly."
+  ],
+  "F0231": [
+    "I prefer healthy meals over fast food.",
+    "I like eating fruits and vegetables a lot."
+  ],
+  "F0232": [
+    "I want to make a big difference in the world.",
+    "My goal is to have a lasting impact on people’s lives."
+  ],
+  "F0233": [
+    "I scored high on resilience tests.",
+    "I bounce back quickly from setbacks."
+  ],
+  "F0234": [
+    "I get bored easily with routine tasks.",
+    "I find it hard to stay engaged when things are too predictable."
+  ],
+  "F0235": [
+    "I really enjoy the taste of dark chocolate.",
+    "The smell of fresh-baked cookies is amazing."
+  ],
+  "F0236": [
+    "I like to delegate tasks and give feedback.",
+    "I often lead meetings and make decisions."
+  ],
+  "F0237": [
+    "I feel a strong connection with this hexagram.",
+    "This I Ching reading really resonates with me."
+  ],
+  "F0238": [
+    "My blood sugar is a bit high today.",
+    "I need to check my glucose levels."
+  ],
+  "F0239": [
+    "I've been to 15 countries so far.",
+    "I have stamps from 7 different continents in my passport."
+  ],
+  "F0240": [
+    "We source 80% of our ingredients locally.",
+    "Our menu lists where each ingredient comes from."
+  ],
+  "F0241": [
+    "I always put patients' needs first.",
+    "My priority is to provide the best care possible."
+  ],
+  "F0242": [
+    "I completed 30 hours of soft-skills training last year.",
+    "I've been doing a lot of workshops on communication skills."
+  ],
+  "F0243": [
+    "I love checking out street art.",
+    "Graffiti adds character to a city."
+  ],
+  "F0244": [
+    "Always prefer cooking at home.",
+    "Home-cooked meals are the best."
+  ],
+  "F0245": [
+    "My immune system is holding up well.",
+    "I'm feeling pretty good, all things considered."
+  ],
+  "F0246": [
+    "Can really put myself in others' shoes.",
+    "Empathy helps me understand people better."
+  ],
+  "F0247": [
+    "Interested in lots of kinks.",
+    "I explore different kinds of kink play."
+  ],
+  "F0248": [
+    "Quick to adapt when things change.",
+    "Flexible thinking helps me handle stress."
+  ],
+  "F0249": [
+    "Always think about the long-term effects.",
+    "I weigh consequences carefully before acting."
+  ],
+  "F0250": [
+    "Sometimes my actions can be harmful.",
+    "I need to watch out for unintended consequences."
+  ],
+  "F0251": [
+    "She's always up for trying new restaurants.",
+    "She loves to explore different cuisines."
+  ],
+  "F0259": [
+    "My basophil count is a bit high.",
+    "The lab said my basophils are 1.2%."
+  ],
+  "F0260": [
+    "I scored low on attachment avoidance.",
+    "My attachment score is only 3 out of 10."
+  ],
+  "F0261": [
+    "I'm more future-oriented than past-oriented.",
+    "I tend to think about the future a lot."
+  ],
+  "F0262": [
+    "I can be pretty bold sometimes.",
+    "I don't mind taking risks."
   ],
   "F0263": [
     "I talk a lot, don't I?",
     "I can go on and on about anything."
   ],
+  "F0264": [
+    "I'm not very fair in my dealings with others.",
+    "I tend to take more than I give."
+  ],
+  "F0265": [
+    "I come up with about 3 new ideas a day.",
+    "On average, I have around 4 fresh ideas each day."
+  ],
+  "F0266": [
+    "My ideas are pretty original.",
+    "I like to think outside the box."
+  ],
+  "F0267": [
+    "I'm not afraid of heights or spiders.",
+    "Physical dangers don't scare me much."
+  ],
+  "F0268": [
+    "I practice for 10 hours a week.",
+    "Dance rehearsals take up about 8 hours each week."
+  ],
+  "F0269": [
+    "I meditate for 30 minutes every day.",
+    "Meditation is part of my daily routine, 5 days a week."
+  ],
+  "F0270": [
+    "I use public transport about 40 km each week.",
+    "I travel by bus or train around 35 km weekly."
+  ],
+  "F0271": [
+    "I always try to be honest, even if it’s not popular.",
+    "People might think I’m too straightforward sometimes."
+  ],
+  "F0272": [
+    "I read the I Ching every morning for guidance.",
+    "The I Ching helps me make decisions throughout the day."
+  ],
+  "F0273": [
+    "I often find myself disagreeing with others.",
+    "I tend to challenge people’s ideas a lot."
+  ],
+  "F0274": [
+    "I volunteer at the local shelter twice a month.",
+    "I’m part of several community groups and events."
+  ],
+  "F0275": [
+    "Sometimes I speak my mind too directly.",
+    "I can come off as pushy sometimes, even if that’s not my intention."
+  ],
+  "F0276": [
+    "I aced the analogy section.",
+    "Figuring out analogies comes naturally to me."
+  ],
+  "F0277": [
+    "I always drop my stuff.",
+    "I'm not good with tools, I break them often."
+  ],
+  "F0278": [
+    "I'd rather talk it out than argue.",
+    "Let's split the difference on this."
+  ],
+  "F0279": [
+    "I feel a strong connection to hexagram 19.",
+    "The energy of that I Ching line really resonates with me."
+  ],
+  "F0280": [
+    "I use my robot assistant every day.",
+    "I interact with robots about twice a week."
+  ],
+  "F0281": [
+    "I prefer to go with the flow.",
+    "I'm not really into planning much."
+  ],
+  "F0282": [
+    "I stay focused even in noisy places.",
+    "I can work anywhere without getting distracted."
+  ],
+  "F0283": [
+    "I need to think about things before I act.",
+    "Context is key for me when making decisions."
+  ],
   "F0284": [
     "I'm not good at delegating tasks.",
     "I usually take on everything myself."
+  ],
+  "F0285": [
+    "I feel a strong connection to hexagram 49 today.",
+    "I meditated on hexagram 49 for my practice."
+  ],
+  "F0286": [
+    "I'm feeling pretty calm right now.",
+    "I tried not to get upset about that."
+  ],
+  "F0287": [
+    "I memorized five verses from the Bible today.",
+    "I recited ten verses from the Quran."
+  ],
+  "F0288": [
+    "I'm quite conventional in my thinking.",
+    "Most people think like me."
+  ],
+  "F0289": [
+    "I studied the Bhagavad-Gita for two hours yesterday.",
+    "I read three chapters of the Bhagavad-Gita this week."
+  ],
+  "F0290": [
+    "I contributed to an open-source project last night.",
+    "I've made 15 contributions this month."
+  ],
+  "F0291": [
+    "I always follow the crowd in social situations.",
+    "Most people do what I do."
+  ],
+  "F0292": [
+    "I like to stand out from the group sometimes.",
+    "I'm not afraid to be different."
+  ],
+  "F0293": [
+    "I've been doing more meditation lately.",
+    "Feeling really connected to the universe today."
+  ],
+  "F0294": [
+    "I trust my gut a lot.",
+    "I feel pretty secure in this relationship."
+  ],
+  "F0295": [
+    "I scored 135 on my IQ test.",
+    "My IQ is around 128, they say."
+  ],
+  "F0296": [
+    "Just hit 100 subscribers on my blog!",
+    "Now I have over 200 followers."
+  ],
+  "F0297": [
+    "I noticed she made a lot of eye contact.",
+    "He didn't make much facial expression, but his body language was open."
+  ],
+  "F0298": [
+    "I haven't touched anything in years.",
+    "My last drug use was about 5 years ago."
+  ],
+  "F0299": [
+    "It usually takes me 45 minutes to get to work.",
+    "I spend an hour commuting every day."
+  ],
+  "F0300": [
+    "Made a quick decision, but it turned out great.",
+    "Takes me longer to decide on big things."
+  ],
+  "F0301": [
+    "I'm really sorry about that.",
+    "It was totally my fault."
+  ],
+  "F0302": [
+    "I lent some money to a friend through that app.",
+    "My buddy needed some cash and I helped out."
+  ],
+  "F0303": [
+    "I try not to look too much when talking.",
+    "I usually avoid eye contact when speaking."
+  ],
+  "F0304": [
+    "I didn't realize that was a no-no.",
+    "I guess I made a mistake there."
+  ],
+  "F0305": [
+    "I'm really organized and always on time.",
+    "I’m very detail-oriented and reliable."
+  ],
+  "F0306": [
+    "Spending time in nature helps me relax a lot.",
+    "Walking in the park clears my head."
+  ],
+  "F0307": [
+    "I love learning new things, it's so exciting!",
+    "Learning is one of my favorite activities."
+  ],
+  "F0308": [
+    "I'm really good at staying organized.",
+    "I always plan ahead and follow through."
+  ],
+  "F0309": [
+    "My honesty-humility score is 45.",
+    "I scored a 42 on the honesty-humility scale."
+  ],
+  "F0310": [
+    "I've been a digital nomad for about 18 months now.",
+    "I spent 2 years working remotely from different places."
+  ],
+  "F0311": [
+    "Sometimes I feel like praying helps, but it's not always positive.",
+    "Praying doesn't always make things better, but I still do it."
+  ],
+  "F0312": [
+    "I love snacking on nuts and fruits.",
+    "I snack a lot, especially on chips and cookies."
+  ],
+  "F0313": [
+    "I see a golden aura around people sometimes.",
+    "Sometimes I perceive a white light around others."
+  ],
+  "F0314": [
+    "I study Zohar for about 2 hours every week.",
+    "I spend an hour studying Kabbalah on the weekends."
+  ],
+  "F0315": [
+    "Money is a big motivator for me.",
+    "Achieving goals drives me more than anything else."
+  ],
+  "F0317": [
+    "I'm a visual learner, so I need to see it to understand.",
+    "Reading maps helps me learn better."
+  ],
+  "F0318": [
+    "Studied seerah for 4 hours last night.",
+    "Had to cram seerah before the exam."
+  ],
+  "F0319": [
+    "Always double-check safety gear before climbing.",
+    "Forgot my helmet once, got a good scare."
+  ],
+  "F0320": [
+    "That's so boring, I need something more exciting!",
+    "Let's watch the latest action movie instead."
   ],
   "F0321": [
     "I'm Canadian.",
     "I was born in the UK, but I consider myself American."
   ],
+  "F0322": [
+    "Why did you say that? That was just silly.",
+    "I thought that joke was pretty funny."
+  ],
+  "F0323": [
+    "We should work together on this project.",
+    "Let's split the tasks and meet up later."
+  ],
+  "F0324": [
+    "I skipped breakfast today, again.",
+    "Forgot to eat before going to the gym."
+  ],
+  "F0325": [
+    "Attended kirtan every Sunday at the temple.",
+    "Missed kirtan last week because of work."
+  ],
   "F0326": [
     "I act without thinking sometimes.",
     "I need to work on my patience."
   ],
+  "F0327": [
+    "Visited the museum 5 times this year.",
+    "I went to the museum about 10 times last year."
+  ],
+  "F0328": [
+    "Joined the choir 4 years ago.",
+    "Have been in the choir for over 6 years now."
+  ],
+  "F0329": [
+    "I fasted for 18 hours today as part of my practice.",
+    "Did the tefila minhagim last Shabbat."
+  ],
+  "F0330": [
+    "Prayed 5 times a day this week.",
+    "Attended services every Friday night and Saturday morning."
+  ],
+  "F0331": [
+    "Always try to give my opinion in meetings.",
+    "I like to share my ideas with the team often."
+  ],
+  "F0332": [
+    "Feeling really energetic today!",
+    "So full of energy, can't sit still."
+  ],
+  "F0333": [
+    "Always cracking jokes at work.",
+    "I'm pretty friendly and like to chat with everyone."
+  ],
+  "F0334": [
+    "Had trouble remembering the grocery list today.",
+    "Forgot where I put my keys a few times this week."
+  ],
+  "F0335": [
+    "I always try to do the right thing.",
+    "Ethics are important to me."
+  ],
+  "F0336": [
+    "I had three channeling sessions this year.",
+    "Last year I did four channelings."
+  ],
+  "F0337": [
+    "Be nice, you never know who's listening.",
+    "Always be polite to everyone."
+  ],
+  "F0338": [
+    "I was diagnosed with mild sleep apnea last month.",
+    "My doctor said I have a few pauses in my breathing at night."
+  ],
+  "F0339": [
+    "She always dresses so elegantly.",
+    "He's such a class act, always well-groomed."
+  ],
+  "F0340": [
+    "I like to have things under control.",
+    "It helps me stay calm when I can plan ahead."
+  ],
+  "F0341": [
+    "I spend about two hours outside every day.",
+    "I try to get at least an hour of fresh air each day."
+  ],
+  "F0342": [
+    "She's so efficient, always gets things done quickly.",
+    "He's very effective, finishes tasks without fuss."
+  ],
+  "F0343": [
+    "My doctor said I have high cholesterol.",
+    "I need to watch my diet more."
+  ],
+  "F0344": [
+    "I'm not sure who I am anymore.",
+    "I feel lost about my identity."
+  ],
+  "F0345": [
+    "I learn best when I can move around.",
+    "I get distracted if I sit still too long."
+  ],
+  "F0346": [
+    "I always feel jittery after coffee.",
+    "I need to cut back on caffeine."
+  ],
+  "F0347": [
+    "I really hate that person.",
+    "That's a hateful thing to say."
+  ],
+  "F0348": [
+    "I keep trying even when it’s hard.",
+    "I don’t give up easily."
+  ],
+  "F0349": [
+    "I have to do everything perfectly.",
+    "I can't stand making mistakes."
+  ],
+  "F0350": [
+    "My wake-up time is pretty consistent every day.",
+    "I usually wake up at the same time every morning."
+  ],
+  "F0351": [
+    "I aced the numerical reasoning test.",
+    "The math problems were a breeze."
+  ],
+  "F0352": [
+    "I had to read between the lines in that conversation.",
+    "Figuring out what she really meant was tough."
+  ],
+  "F0353": [
+    "I'm pretty proud of being American.",
+    "Supporting my country is important to me."
+  ],
+  "F0354": [
+    "I lead by example, not orders.",
+    "I like to delegate tasks and empower others."
+  ],
+  "F0355": [
+    "I always agree with what the boss says.",
+    "I'm not one to challenge authority much."
+  ],
+  "F0356": [
+    "I meditated using the I Ching today.",
+    "I cast the hexagram for guidance."
+  ],
+  "F0357": [
+    "I identify as a Type 8, the Challenger.",
+    "My personality fits the description of a Type 9, the Peacemaker."
+  ],
+  "F0358": [
+    "It took me a while to calm down after that argument.",
+    "Recovering from stress is harder for me than others."
+  ],
+  "F0359": [
+    "I figured out why my phone wasn't connecting.",
+    "Restarted the router and it worked."
+  ],
+  "F0360": [
+    "My friend always makes me feel better about myself.",
+    "She's so supportive, I really need her around."
+  ],
   "F0361": [
     "I get easily annoyed with small things.",
     "I'm feeling a bit irritable today."
+  ],
+  "F0362": [
+    "I love trying new foods when traveling.",
+    "It’s fun to meet locals and taste their dishes."
+  ],
+  "F0363": [
+    "I memorized Surah Al-Ikhlas recently.",
+    "I’ve got 15 surahs down now."
+  ],
+  "F0364": [
+    "I trust my friends to keep secrets.",
+    "They always come through for me."
+  ],
+  "F0365": [
+    "I use the app every day to track my expenses.",
+    "It helps me save more money."
+  ],
+  "F0366": [
+    "I try not to be judgmental about others.",
+    "I focus on being positive and supportive instead."
+  ],
+  "F0367": [
+    "I drink two cups of coffee a day.",
+    "It helps me stay alert in the morning."
+  ],
+  "F0368": [
+    "I'm not afraid to show my feelings.",
+    "Sometimes I open up too much."
+  ],
+  "F0369": [
+    "I always plan ahead for vacations.",
+    "I like to know what's coming next."
+  ],
+  "F0370": [
+    "The scale ranges from 1 to 5.",
+    "This measures how often you do something."
+  ],
+  "F0371": [
+    "I avoid making big decisions.",
+    "I tend to shy away from risky choices."
+  ],
+  "F0372": [
+    "We have a security system installed at home.",
+    "Our house is protected by a security system."
+  ],
+  "F0373": [
+    "I'm not very trusting of others.",
+    "I often doubt people's intentions."
+  ],
+  "F0374": [
+    "I prefer to cook at home most days.",
+    "I like eating out only a few times a week."
+  ],
+  "F0375": [
+    "I feel confident making choices.",
+    "Decisions don't usually stress me out."
+  ],
+  "F0376": [
+    "I always try to do my part.",
+    "It's important to follow the rules."
+  ],
+  "F0377": [
+    "Everything is connected, you know?",
+    "There’s a web of life out there."
+  ],
+  "F0378": [
+    "I like things that are a bit offbeat.",
+    "Sometimes I just do the opposite for fun."
+  ],
+  "F0379": [
+    "I find new ways to keep going.",
+    "Even when it’s tough, I come up with solutions."
+  ],
+  "F0380": [
+    "I can process a lot in a short time.",
+    "My brain works really fast."
+  ],
+  "F0381": [
+    "Always nice to meet new people.",
+    "It’s good to be friendly."
+  ],
+  "F0382": [
+    "I like mindful breathing exercises.",
+    "I do body scans sometimes."
+  ],
+  "F0383": [
+    "I think about money in terms of value, not just cost.",
+    "It’s important to understand how things work financially."
+  ],
+  "F0384": [
+    "I always follow the rules at work.",
+    "Most of my friends decide what to do."
+  ],
+  "F0385": [
+    "My dog gets 2 new toys every month.",
+    "I take my cat on walks twice a day."
+  ],
+  "F0386": [
+    "I love going to art galleries.",
+    "Spending time in nature makes me happy."
+  ],
+  "F0387": [
+    "I prefer emotional support when I'm down.",
+    "When my car broke, I asked for practical help fixing it."
+  ],
+  "F0388": [
+    "I can do 10 multiplication problems in a minute.",
+    "Figuring out tips at restaurants is quick for me."
+  ],
+  "F0389": [
+    "I never make mistakes at work.",
+    "Everything I do is perfect."
+  ],
+  "F0390": [
+    "I often doubt my abilities to finish projects.",
+    "Sometimes I worry about not doing things well enough."
+  ],
+  "F0392": [
+    "I just got certified in Python.",
+    "Used Excel to analyze sales data."
+  ],
+  "F0393": [
+    "Always light candles at sunset on Fridays.",
+    "Forgot one Shabbat this month, but it was a holiday."
+  ],
+  "F0394": [
+    "I misspelled 'accommodate' in my email.",
+    "Got three spelling errors in the report today."
+  ],
+  "F0395": [
+    "Did 20 rounds of dhikr this morning.",
+    "Finished 15 cycles of dhikr already."
+  ],
+  "F0396": [
+    "I feel really calm and centered today.",
+    "The noise outside doesn't bother me much."
+  ],
+  "F0397": [
+    "I stuck with my diet even when I wanted to cheat.",
+    "Started that project last week and still working on it."
+  ],
+  "F0398": [
+    "Always offer my seat to the elderly.",
+    "Told the manager about the issue, even though it wasn't my fault."
+  ],
+  "F0399": [
+    "Eaten out for lunch every day this week.",
+    "Most of what I eat is fresh and home-cooked."
   ]
 }

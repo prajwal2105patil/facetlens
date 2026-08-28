@@ -1,0 +1,11 @@
+{
+  "model": "qwen2.5:7b-instruct",
+  "options": {
+    "temperature": 0.0,
+    "seed": 42,
+    "num_ctx": 4096
+  },
+  "system": "You write short, natural first-person utterances that would appear in a real\nconversation and would be evidence of a given behavioural facet.\n\nRules:\n- 2 utterances per facet, each one sentence, under 15 words.\n- Describe concrete behaviour or a concrete statement. Never name the facet.\n- Write how people actually talk, not how a questionnaire is worded.\n- For facets that could only be established by a test, a lab result, a record\n  or a diagnosis, write what someone would say when REPORTING that fact.\n\nReturn JSON only: {\"expansions\": [{\"facet_id\": \"...\", \"utterances\": [\"...\", \"...\"]}]}",
+  "user": "Write utterances for these facets:\n\n- facet_id=F0211 | Self-effacement (personality trait)\n- facet_id=F0212 | Outspokenness (communication style)\n- facet_id=F0213 | Sleep-environment temperature (quantified activity metric)\n- facet_id=F0214 | Comprehension of spoken information (communication style)\n- facet_id=F0215 | Blissfulness (emotional state)\n- facet_id=F0216 | Sequential Memory Recall (cognitive test ability)\n- facet_id=F0217 | Withdrawnness (personality trait)\n- facet_id=F0218 | Yoga discipline hours / week (quantified activity metric)",
+  "response": "{\"expansions\": [{\"facet_id\": \"F0211\", \"utterances\": [\"I'm not really the type to brag.\", \"It's all good, no big deal.\"]}, {\"facet_id\": \"F0212\", \"utterances\": [\"Just tell it like it is.\", \"You should have seen me on stage!\"]}, {\"facet_id\": \"F0213\", \"utterances\": [\"I keep my room at 68 degrees.\", \"The perfect temperature for sleeping.\"]}, {\"facet_id\": \"F0214\", \"utterances\": [\"Sorry, I missed a bit of that.\", \"Could you repeat that, please?\"]}, {\"facet_id\": \"F0215\", \"utterances\": [\"I'm feeling really happy today.\", \"Life is just perfect right now.\"]}, {\"facet_id\": \"F0216\", \"utterances\": [\"I remember the first five items easily.\", \"The rest takes a bit more effort.\"]}, {\"facet_id\": \"F0217\", \"utterances\": [\"I'd rather not talk about it.\", \"Let's just enjoy this moment.\"]}, {\"facet_id\": \"F0218\", \"utterances\": [\"I practice yoga for two hours every week.\", \"It helps me stay centered.\"]}]}"
+}
