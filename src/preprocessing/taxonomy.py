@@ -41,6 +41,7 @@ FACET_TYPES = (
     "spiritual_religious_disposition",
     # --- NOT conversation-observable ---
     "cognitive_test_ability",
+    "psychometric_instrument_score",
     "spiritual_religious_practice_metric",
     "clinical_mental_health",
     "biometric_physiological",
@@ -67,6 +68,7 @@ _OBSERVABLE: frozenset[str] = frozenset(
 # Why each non-observable type cannot be scored from conversation alone.
 _ABSTENTION_REASON: dict[str, str] = {
     "cognitive_test_ability": "requires_standardised_assessment",
+    "psychometric_instrument_score": "psychometric_instrument_scale",
     "spiritual_religious_practice_metric": "requires_quantified_self_report",
     "clinical_mental_health": "requires_clinical_assessment",
     "biometric_physiological": "requires_biometric_measurement",
@@ -155,6 +157,18 @@ RULES: tuple[Rule, ...] = (
          _rx(r"\b(mathematical (concepts|formulas)|numerical reasoning|"
              r"statistical reasoning|anatomy knowledge|material properties|"
              r"network basics|mechanical concepts)\b")),
+
+    # 3b. Psychometric instrument outputs. Found by the seeded manual spot-check
+    #     (see artifacts/audit_report.md S8): "Sense-of-coherence score",
+    #     "Honesty-humility trait score", "Ethical leadership rating" and
+    #     "Eye-Contact avoidance score" were all being routed to the LLM as
+    #     observable. A score/rating/scale IS an instrument output - it is
+    #     produced by administering a questionnaire or by third-party raters,
+    #     never by reading a conversation. This was 4 of 30 sampled rows, and
+    #     every one erred in the dangerous direction.
+    Rule("psychometric_instrument_output", "psychometric_instrument_score",
+         _rx(r"\b(score|rating|ratings|scale|inventory|questionnaire|"
+             r"assessment|quotient)\b")),
 
     # 4. Countable / measurable activity. The giveaway is a UNIT or a COUNT
     #    noun: these need diaries, logs or platform records, never a snippet.

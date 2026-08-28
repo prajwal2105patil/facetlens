@@ -239,9 +239,50 @@ misclassification.
 4. A seeded {SPOT_CHECK_N}-row manual spot-check (seed {SPOT_CHECK_SEED}) is
    recorded in section 8; its disagreement count is the honest accuracy signal.
 
-## 8. Manual spot-check sample (seed {SPOT_CHECK_SEED})
+## 8. Manual spot-check (seed {SPOT_CHECK_SEED}, n={SPOT_CHECK_N})
 
-Reviewed by hand; see README for the resulting disagreement count.
+This sample was reviewed by hand, row by row, on 2026-08-28. It is the honest
+accuracy signal for the classifier, and it found real problems.
+
+### Result of the first review pass: 4 / {SPOT_CHECK_N} observability errors (13.3%)
+
+All four erred in the **dangerous direction** - marked observable when they are
+not, meaning they would have been sent to the LLM and scored:
+
+| row | was classified | should be |
+|---|---|---|
+| `Sense-of-coherence score` | `personality_trait`, observable | instrument output |
+| `Psychological construct: Eye-Contact avoidance score` | `communication_style`, observable | instrument output - and a *text* conversation cannot observe eye contact at all |
+| `Honesty-humility trait score` | `motivation_value`, observable | HEXACO instrument output |
+| `Ethical leadership rating` | `interpersonal`, observable | a rating, typically by third parties |
+
+**Single shared root cause.** Words denoting a measurement instrument -
+`score`, `rating`, `scale` - were not treated as non-observability signals. A
+score is produced by administering a questionnaire or by external raters, never
+by reading a conversation.
+
+**Fix.** Added the `psychometric_instrument_output` rule and the
+`psychometric_instrument_score` type. Observable rows dropped from 245 to 235;
+`Sportsmanship rating` was caught as well.
+
+Two further rows were judged **borderline rather than wrong**:
+`Negative Affect Frequency` (gated on "Frequency" - defensible, since frequency
+over time is not establishable from one snippet) and
+`Defense-mechanism tendency: Introjection` (kept observable, though a
+psychodynamic defence arguably needs clinical inference).
+
+### Important caveat on this number
+
+Having driven the fix, **this sample is no longer an unbiased estimator**. The
+post-fix error count on these same 30 rows is 0 by construction, and quoting
+that would be meaningless. A fresh sample under a different seed would be
+needed for an honest post-fix estimate; that is listed as remaining work rather
+than claimed as done.
+
+The pre-fix figure of 4/{SPOT_CHECK_N} is the one to trust, and it suggests the
+classifier's real observability error rate is on the order of 10%.
+
+### The sampled rows
 
 | facet_raw | facet_type | observable | rule |
 |---|---|:--:|---|

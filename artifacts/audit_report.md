@@ -5,7 +5,7 @@ from `data/raw/Facets Assignment.csv` at run time; none is hardcoded.
 
 - **Rows analysed:** 399
 - **Distinct raw values:** 399
-- **Classified conversation-observable:** 245 / 399 (61.4%)
+- **Classified conversation-observable:** 235 / 399 (58.9%)
 
 ## 1. Duplicates
 
@@ -84,20 +84,21 @@ silently discarded.
 
 | value | count | share |
 |---|---:|---:|
-| `personality_trait` | 106 | 26.6% |
+| `personality_trait` | 100 | 25.1% |
 | `quantified_activity_metric` | 53 | 13.3% |
 | `instrument_or_scale_header` | 31 | 7.8% |
 | `cognitive_test_ability` | 28 | 7.0% |
-| `interpersonal` | 28 | 7.0% |
-| `emotional_state` | 23 | 5.8% |
+| `interpersonal` | 27 | 6.8% |
+| `emotional_state` | 22 | 5.5% |
 | `behavioral_tendency` | 20 | 5.0% |
 | `cognitive_style` | 18 | 4.5% |
 | `preference_lifestyle` | 17 | 4.3% |
-| `motivation_value` | 16 | 4.0% |
+| `motivation_value` | 15 | 3.8% |
 | `clinical_mental_health` | 13 | 3.3% |
 | `biometric_physiological` | 12 | 3.0% |
-| `communication_style` | 12 | 3.0% |
+| `communication_style` | 11 | 2.8% |
 | `spiritual_religious_practice_metric` | 11 | 2.8% |
+| `psychometric_instrument_score` | 10 | 2.5% |
 | `demographic_biographical` | 6 | 1.5% |
 | `spiritual_religious_disposition` | 5 | 1.3% |
 
@@ -108,21 +109,22 @@ classification can be audited or challenged.
 
 | value | count | share |
 |---|---:|---:|
-| `fallback_bare_trait_noun` | 106 | 26.6% |
+| `fallback_bare_trait_noun` | 100 | 25.1% |
 | `quantified_count_noun` | 38 | 9.5% |
 | `structural_header` | 31 | 7.8% |
-| `interpersonal` | 28 | 7.0% |
-| `emotional` | 23 | 5.8% |
+| `interpersonal` | 27 | 6.8% |
+| `emotional` | 22 | 5.5% |
 | `cognitive_test_score` | 21 | 5.3% |
 | `behavioral_tendency` | 20 | 5.0% |
 | `cognitive_style` | 18 | 4.5% |
 | `preference_lifestyle` | 17 | 4.3% |
-| `motivation` | 16 | 4.0% |
+| `motivation` | 15 | 3.8% |
 | `quantified_unit_bearing` | 15 | 3.8% |
-| `communication` | 12 | 3.0% |
 | `clinical_named_scale` | 11 | 2.8% |
+| `communication` | 11 | 2.8% |
 | `spiritual_practice_named` | 11 | 2.8% |
 | `biomarker_named_analyte` | 10 | 2.5% |
+| `psychometric_instrument_output` | 10 | 2.5% |
 | `cognitive_test_academic` | 7 | 1.8% |
 | `demographic_fact` | 6 | 1.5% |
 | `spiritual_disposition` | 5 | 1.3% |
@@ -131,7 +133,7 @@ classification can be audited or challenged.
 | `biomarker_body_measure` | 1 | 0.3% |
 | `biomarker_genetic` | 1 | 0.3% |
 
-**Fallback dependence:** 106 rows (26.6%) matched no keyword
+**Fallback dependence:** 100 rows (25.1%) matched no keyword
 rule and fell through to `fallback_bare_trait_noun`, which defaults them to an
 observable `personality_trait`. These are mostly bare disposition nouns
 (`Naivety`, `Cunningness`, `Dignity`). The default is defensible for a
@@ -142,8 +144,8 @@ misclassification.
 
 | value | count | share |
 |---|---:|---:|
-| `low` | 312 | 78.2% |
-| `medium` | 56 | 14.0% |
+| `low` | 313 | 78.4% |
+| `medium` | 55 | 13.8% |
 | `high` | 31 | 7.8% |
 
 ## 7. Known limitations of this audit
@@ -158,14 +160,55 @@ misclassification.
 4. A seeded 30-row manual spot-check (seed 42) is
    recorded in section 8; its disagreement count is the honest accuracy signal.
 
-## 8. Manual spot-check sample (seed 42)
+## 8. Manual spot-check (seed 42, n=30)
 
-Reviewed by hand; see README for the resulting disagreement count.
+This sample was reviewed by hand, row by row, on 2026-08-28. It is the honest
+accuracy signal for the classifier, and it found real problems.
+
+### Result of the first review pass: 4 / 30 observability errors (13.3%)
+
+All four erred in the **dangerous direction** - marked observable when they are
+not, meaning they would have been sent to the LLM and scored:
+
+| row | was classified | should be |
+|---|---|---|
+| `Sense-of-coherence score` | `personality_trait`, observable | instrument output |
+| `Psychological construct: Eye-Contact avoidance score` | `communication_style`, observable | instrument output - and a *text* conversation cannot observe eye contact at all |
+| `Honesty-humility trait score` | `motivation_value`, observable | HEXACO instrument output |
+| `Ethical leadership rating` | `interpersonal`, observable | a rating, typically by third parties |
+
+**Single shared root cause.** Words denoting a measurement instrument -
+`score`, `rating`, `scale` - were not treated as non-observability signals. A
+score is produced by administering a questionnaire or by external raters, never
+by reading a conversation.
+
+**Fix.** Added the `psychometric_instrument_output` rule and the
+`psychometric_instrument_score` type. Observable rows dropped from 245 to 235;
+`Sportsmanship rating` was caught as well.
+
+Two further rows were judged **borderline rather than wrong**:
+`Negative Affect Frequency` (gated on "Frequency" - defensible, since frequency
+over time is not establishable from one snippet) and
+`Defense-mechanism tendency: Introjection` (kept observable, though a
+psychodynamic defence arguably needs clinical inference).
+
+### Important caveat on this number
+
+Having driven the fix, **this sample is no longer an unbiased estimator**. The
+post-fix error count on these same 30 rows is 0 by construction, and quoting
+that would be meaningless. A fresh sample under a different seed would be
+needed for an honest post-fix estimate; that is listed as remaining work rather
+than claimed as done.
+
+The pre-fix figure of 4/30 is the one to trust, and it suggests the
+classifier's real observability error rate is on the order of 10%.
+
+### The sampled rows
 
 | facet_raw | facet_type | observable | rule |
 |---|---|:--:|---|
 | `Choir participation years` | quantified_activity_metric | no | `quantified_count_noun` |
-| `Sense-of-coherence score` | personality_trait | yes | `fallback_bare_trait_noun` |
+| `Sense-of-coherence score` | psychometric_instrument_score | no | `psychometric_instrument_output` |
 | `Assertiveness and control in relationships` | interpersonal | yes | `interpersonal` |
 | `Rapid cognitive processing` | cognitive_test_ability | no | `cognitive_test_score` |
 | `Peer-collaboration hours` | quantified_activity_metric | no | `quantified_count_noun` |
@@ -177,7 +220,7 @@ Reviewed by hand; see README for the resulting disagreement count.
 | `Hatefulness` | personality_trait | yes | `fallback_bare_trait_noun` |
 | `Robotics-interaction frequency` | quantified_activity_metric | no | `quantified_count_noun` |
 | `Submissiveness` | personality_trait | yes | `fallback_bare_trait_noun` |
-| `Psychological construct: Eye-Contact avoidance score` | communication_style | yes | `communication` |
+| `Psychological construct: Eye-Contact avoidance score` | psychometric_instrument_score | no | `psychometric_instrument_output` |
 | `Withdrawnness` | personality_trait | yes | `fallback_bare_trait_noun` |
 | `Moroseness` | emotional_state | yes | `emotional` |
 | `Compassion Fatigue` | clinical_mental_health | no | `clinical_named_scale` |
@@ -185,7 +228,7 @@ Reviewed by hand; see README for the resulting disagreement count.
 | `Psychoticism` | clinical_mental_health | no | `clinical_named_scale` |
 | `Liberalism` | motivation_value | yes | `motivation` |
 | `Basophil count` | biometric_physiological | no | `biomarker_named_analyte` |
-| `Honesty-humility trait score` | motivation_value | yes | `motivation` |
+| `Honesty-humility trait score` | psychometric_instrument_score | no | `psychometric_instrument_output` |
 | `Cunningness` | personality_trait | yes | `fallback_bare_trait_noun` |
 | `Conventional` | personality_trait | yes | `fallback_bare_trait_noun` |
 | `Impartial-mindedness` | personality_trait | yes | `fallback_bare_trait_noun` |
@@ -193,4 +236,4 @@ Reviewed by hand; see README for the resulting disagreement count.
 | `Genialness` | personality_trait | yes | `fallback_bare_trait_noun` |
 | `Defense-mechanism tendency: Introjection` | behavioral_tendency | yes | `behavioral_tendency` |
 | `Blissfulness` | emotional_state | yes | `emotional` |
-| `Ethical leadership rating` | interpersonal | yes | `interpersonal` |
+| `Ethical leadership rating` | psychometric_instrument_score | no | `psychometric_instrument_output` |
