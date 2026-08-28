@@ -238,64 +238,80 @@ hardcoded.
 
 | metric | result |
 |---|---|
-| Status agreement (scored vs abstained vs refused) | 41/55 (74.5%) |
-| Exact score agreement | 5/11 (45.5%) |
-| **Within +/-1** | **11/11 (100%)** |
-| Correct abstentions | 30/36 (83.3%) |
-| Missed abstentions (scored something unsupported) | 6 |
-| False abstentions (abstained where a score was expected) | 8 |
+| **Status agreement** (scored vs abstained vs refused) | **48/55 (87.3%)** |
+| **Correct abstentions** | **33/36 (91.7%)** |
+| Within +/-1 | 13/15 (86.7%) |
+| Exact score agreement | 3/15 (20.0%) - see the calibration note below |
+| Missed abstentions (scored something unsupported) | 3 |
+| False abstentions (abstained where a score was expected) | 4 |
 | Verdicts ending in `error` | **1 of 362** |
 | Facets answered with **no LLM call** | 136 (38%) |
 
-**Zero hallucination-trap failures.** Across all three traps, no medical, lab,
-financial-count or religious-practice facet was scored. Every `not_observable`
-gate held, in every run.
+**Zero hallucination-trap failures**, in every run. No medical, lab,
+financial-count or religious-practice facet has ever been scored.
 
-### The scale change that made the numbers worse
+### A correction: I published a causal claim the experiment could not support
 
-These figures are **lower than an earlier configuration of the same system**,
-and the reason is a deliberate fix that did not pay off. Both configurations
-were measured on the identical benchmark:
+An earlier version of this README stated that fixing the anchor scale cost 11
+points of agreement. **That was wrong, and the error is instructive enough to
+leave documented rather than quietly amend.**
 
-| | anchor v1 (shipped earlier) | **anchor v2 (shipped now)** |
+Four things changed between those two runs, not one:
+
+| | earlier run | later run |
 |---|---|---|
-| level 1 means | "no or very weak evidence" | "present but minimally expressed" |
-| status agreement | **85.5%** | 74.5% |
-| exact score agreement | **56.2%** | 45.5% |
-| within +/-1 | 93.8% | **100%** |
-| false abstentions | **3** | 8 |
-| missed abstentions | 5 | 6 |
+| anchor scale | v1 | v2 |
+| **retrieval mode** | **dense** | **hybrid** |
+| Gate 3c evidence policy | absent | present |
+| facet expansions | absent | present |
 
-**Why v2 exists.** v1 contained a genuine specification contradiction: "no
-evidence" was simultaneously the definition of score 1 *and* the definition of
-`insufficient_evidence`. The model was offered two correct answers. It was
-caught on *"Things are okay"*, where `Enthusiasm` scored 1 with the reason *"the
-statement is neutral and does not express enthusiasm"* - correct reasoning,
-wrong output.
+The retrieval default was the culprit. `retrieve()` defaulted to `mode="hybrid"`
+while `ablation.py` simultaneously reported **dense** as the shipped
+configuration - so the pipeline ran a setting my own ablation had already
+measured as worse, and the documentation described a setting the code did not
+use. Full write-up in DEBUGGING.md #11.
 
-**What v2 cost.** The contradiction is gone (that conversation now scores
-nothing at all, which is right), but raising the bar for level 1 made the model
-markedly more conservative overall: **5 additional false abstentions**, on
-facets the reference expects to score 2 or 3.
+Re-running with **only** that one variable reverted:
 
-**Why v2 ships anyway.** Three reasons, and I would defend all three:
+| | hybrid | **dense** |
+|---|---:|---:|
+| status agreement | 74.5% | **87.3%** |
+| correct abstentions | 83.3% | **91.7%** |
+| missed abstentions | 6 | **3** |
+| false abstentions | 8 | **4** |
 
-1. The errors moved in the **safe** direction. A false abstention costs
-   coverage; a missed abstention invents a fact. Missed abstentions rose by
-   only 1, while false abstentions absorbed the change.
-2. **Within +/-1 is now 100%.** When the system does commit to a score, it is
-   never more than one level from the human label. v1 scored more often and
-   less precisely.
-3. v1's headline number was partly earned by a defect. A scale that lets
-   "absent" be scored as 1 will agree with a reference set more often *and* be
-   wrong about what it is measuring.
++12.8 points from a one-word default. The anchor scale was not the cause.
 
-**The honest counter-argument**, which I am not hiding: 74.5% is worse than
-85.5%, the fix was found late, and there was no time to re-tune the anchor
-wording after seeing its effect. A better v3 probably exists - level 1 as
-"present but minimal" with an explicit instruction that hedged self-report
-still counts as evidence - and it was not attempted because validating it
-needs another full benchmark run.
+### Why exact score agreement is 20% and why that number is not what it looks like
+
+Signed differences on the 15 pairs where both the reference and the system
+scored:
+
+```
+system - reference:  +1 : 8 pairs   <- the mode
+                     +0 : 3
+                     -1 : 2
+                     +2 : 1
+                     -3 : 1
+```
+
+Eight of fifteen off by exactly +1 is a scale offset, not scatter. The reference
+labels were written against **anchor v1**, where level 1 meant "no or very weak
+evidence". Anchor v2 redefined level 1 as "present but minimally expressed", so
+every level now asserts the facet is present and the whole scale moved up one
+notch relative to the labels.
+
+**The yardstick changed and the reference set did not.** That is why the metrics
+which ignore the absolute level (status agreement 87.3%, correct abstentions
+91.7%, +/-1 86.7%) are the best this system has produced, while the one metric
+that depends on it collapsed.
+
+**Deliberately not fixed.** Re-deriving the labels under v2 anchors *after*
+seeing which direction improves the score is fitting the reference set to the
+system, and it would destroy the only artefact whose worth depends on being
+independent. The legitimate version - re-deriving each label from its own
+written rationale under v2 definitions, blind to system output - is listed under
+next steps.
 
 ### Where it actually fails
 
@@ -509,16 +525,22 @@ misdirected.
 
 ## With another day
 
-1. **Re-tune the anchor scale (v3).** v2 fixed a real contradiction and cost 11
-   points of status agreement by over-abstaining. Keep level 1 as "present but
-   minimal" and add one instruction: a hedged self-report is still evidence and
-   belongs at 2, not at abstention. That targets the 8 false abstentions
-   directly. One benchmark run to validate.
-2. **A cross-encoder reranker over K=100.** Recall is 89% at K=100 and 63% at
+1. **Re-derive the reference labels under v2 anchors, blind.** Eight of fifteen
+   scored pairs are off by exactly +1 because the labels encode v1's scale. Each
+   label carries a written rationale, so they can be re-derived from those
+   rationales under the v2 definitions - but it must be done without sight of
+   system output, ideally by someone who has not seen these results, or it is
+   just fitting the reference set to the system.
+2. **Record the run configuration in the report header.** Retrieval mode, anchor
+   version, gate set and expansion state, generated from the live objects rather
+   than from what the author believes is set. The confounded comparison that
+   produced a false claim in this document would have been visible in a diff
+   between two report headers (DEBUGGING.md #11, PROMPT_LOG Correction 9).
+3. **A cross-encoder reranker over K=100.** Recall is 89% at K=100 and 63% at
    K=25, so the right facets are retrieved and simply not ranked. Four
    bi-encoder-side interventions failed (DECISIONS.md D10/D11); this is the
    remaining hypothesis.
-3. **Second-model agreement** as a confidence signal, since self-reported
+4. **Second-model agreement** as a confidence signal, since self-reported
    confidence measured as uninformative (0.9 bucket -> 44% agreement). Try
    `bge-small-en-v1.5`, add lexical BM25 as a hybrid channel (abstract trait
    nouns are exactly where dense retrieval underperforms), and expand each facet

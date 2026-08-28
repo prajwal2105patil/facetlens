@@ -6,54 +6,54 @@ Every number below is produced by the evaluation code; none is hardcoded.
 ## Run shape
 
 - Conversations: **13**
-- Verdicts emitted: **362**
+- Verdicts emitted: **361**
 - Reference-labelled pairs evaluated: **55**
-- Facets answered by the observability gate with **no LLM call**: **126** (35% of all verdicts)
-- Facets refused by the Art.9 policy gate with **no LLM call**: **10**
+- Facets answered by the observability gate with **no LLM call**: **107** (30% of all verdicts)
+- Facets refused by the Art.9 policy gate with **no LLM call**: **6**
 
 ### Measured cost, and what the gates save
 
 At the rates measured on this machine (CPU-only, ~8.2 tok/s generation, ~33 tok/s prompt evaluation, ~50s per batch of 5):
 
-- LLM calls actually made: **50** batches for **226** facets
-- Calls avoided by the two pre-LLM gates: **28** batches for **136** facets
-- Estimated wall-clock spent: **~42 min**; avoided: **~23 min**
-- Gates removed **38%** of candidate facets before any token was spent.
+- LLM calls actually made: **55** batches for **248** facets
+- Calls avoided by the two pre-LLM gates: **23** batches for **113** facets
+- Estimated wall-clock spent: **~46 min**; avoided: **~19 min**
+- Gates removed **31%** of candidate facets before any token was spent.
 
 > The gates are not only a correctness control - they are the main cost control. Their share grows with a catalogue as metric- and medical-heavy as this one, which is what makes the 5,000-facet story work.
 
 | status | count |
 |---|---:|
-| `insufficient_evidence` | 174 |
-| `not_observable` | 126 |
-| `scored` | 51 |
-| `policy_blocked` | 10 |
+| `insufficient_evidence` | 184 |
+| `not_observable` | 107 |
+| `scored` | 63 |
+| `policy_blocked` | 6 |
 | `error` | 1 |
 
 ## Agreement with the human reference set
 
-- **Status agreement** (scored vs abstained vs not_observable): 41/55 (74.5%)
-- **Exact score agreement** (both scored): 5/11 (45.5%)
-- **Within +/-1**: 11/11 (100.0%)
+- **Status agreement** (scored vs abstained vs not_observable): 48/55 (87.3%)
+- **Exact score agreement** (both scored): 3/15 (20.0%)
+- **Within +/-1**: 13/15 (86.7%)
 
 ## Abstention analysis
 
-- **Correct abstentions**: 30/36 (83.3%)
-- **Missed abstentions** (system scored something the reference says is unsupported): **6**
-- **False abstentions** (system abstained where the reference expects a score): **8**
+- **Correct abstentions**: 33/36 (91.7%)
+- **Missed abstentions** (system scored something the reference says is unsupported): **3**
+- **False abstentions** (system abstained where the reference expects a score): **4**
 
 > Missed abstentions are the dangerous direction: they are confident hallucinations. False abstentions cost coverage but never invent a fact.
 
 ## Retrieval
 
-- **Recall@25** of reference-labelled facets: 18/55 (32.7%)
+- **Recall@25** of reference-labelled facets: 19/55 (34.5%)
 
 Measured before any labelled facet is force-included, so misses are visible rather than absorbed.
 
 ## Robustness
 
 - Verdicts that ended as `error`: **1**
-- Contradictory verdicts repaired toward abstention: **1**
+- Contradictory verdicts repaired toward abstention: **0**
 - Fabricated evidence quotes caught by the verifier: **1**
 
 ## Confidence calibration
@@ -62,86 +62,63 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | confidence bucket | exact agreement |
 |---|---|
-| 0.8 | 2/5 (40.0%) |
-| 0.9 | 3/4 (75.0%) |
-| 1.0 | 0/2 (0.0%) |
+| 0.6 | 1/1 (100.0%) |
+| 0.8 | 1/7 (14.3%) |
+| 0.9 | 0/5 (0.0%) |
+| 1.0 | 1/2 (50.0%) |
 
 ## Failure cases
 
 | type | count |
 |---|---:|
-| `false_abstention` | 8 |
-| `missed_abstention` | 6 |
+| `false_abstention` | 4 |
+| `missed_abstention` | 3 |
+| `score_disagreement` | 2 |
 
-### `false_abstention` - c01_clear / Assertiveness and control in relationships
+### `false_abstention` - c03_contradictory / Cooperation
 - expected: **scored 3**, got: **insufficient_evidence**
-- reference rationale: Led the team and convened the call. Directive but not forceful; moderate, explicit evidence.
-- system reason: The speaker does not explicitly describe assertiveness or control in relationships.
-
-### `false_abstention` - c02_ambiguous / Cooperation
-- expected: **scored 2**, got: **insufficient_evidence**
-- reference rationale: Hedged self-report ('I guess I'm pretty good') with no behaviour described. Weak evidence only.
-- system reason: The speaker does not describe relating to others in terms of cooperation.
-
-### `false_abstention` - c02_ambiguous / Collaboration
-- expected: **scored 2**, got: **insufficient_evidence**
-- reference rationale: Same hedged claim. Deliberately a 2, not a 4 - self-assertion without instance.
-- system reason: The speaker does not explicitly describe collaboration with others, making it difficult to gauge this disposition.
-
-### `false_abstention` - c03_contradictory / Collaboration
-- expected: **scored 3**, got: **insufficient_evidence**
-- reference rationale: CONTRADICTION RESOLVED toward described behaviour: abstract 'I dislike teamwork' is outweighed by six months actually running a team and enjoying it. Scored moderate, not high, because the contradiction is unresolved by the speaker.
-- system reason: The speaker does not describe their own collaboration with others.
+- reference rationale: Same resolution rule: concrete sustained behaviour beats stated preference.
+- system reason: Downgraded by the evidence verifier: the cited quote 'I disliked teamwork and I avoid group projects whenever I ca' does not appear in the conversation. Original model reason: The speaker explicitly states a preference for avoiding teamwork, but also mentions running a product team, indicating some level of cooperation.
 
 ### `missed_abstention` - c03_contradictory / Withdrawnness
-- expected: **insufficient_evidence**, got: **scored 4**
+- expected: **insufficient_evidence**, got: **scored 3**
 - reference rationale: Avoiding group projects hints at it, but leading a team for six months directly contradicts it. Net evidence is not interpretable.
-- system reason: The speaker strongly expresses a preference for working alone, which is indicative of withdrawnness.
+- system reason: The speaker explicitly states avoiding group projects, which suggests a withdrawnness from social interactions.
 
 ### `false_abstention` - c04_quoted / Assertiveness and control in relationships
 - expected: **scored 2**, got: **insufficient_evidence**
 - reference rationale: QUOTED SPEECH: 'most assertive person on this team' is the MANAGER's claim, not the speaker's. The speaker's own reported behaviour - 'I usually just go along' - points the other way. Weak evidence at most.
-- system reason: The speaker does not provide concrete examples of assertiveness or control in relationships, only a comparison to others and their own behavior in meetings.
+- system reason: The speaker does not directly describe their own assertiveness or control in relationships, only what a manager said about them.
 
 ### `false_abstention` - c04_quoted / Withdrawnness
 - expected: **scored 2**, got: **insufficient_evidence**
 - reference rationale: 'go along with whatever has already been decided' is weak evidence of deferring rather than withdrawing.
-- system reason: The conversation does not provide evidence that the speaker displays 'Withdrawnness'.
-
-### `missed_abstention` - c05_sarcastic / Talkativeness
-- expected: **insufficient_evidence**, got: **scored 5**
-- reference rationale: SARCASM: 'world's greatest communicator' is ironic, immediately undercut by three people deploying to the wrong environment. Not evidence of talkativeness either way.
-- system reason: The speaker uses a boastful and expansive statement to describe their communication skills.
-
-### `missed_abstention` - c05_sarcastic / Brevity
-- expected: **insufficient_evidence**, got: **scored 1**
-- reference rationale: The failed explanation says nothing about concision specifically.
-- system reason: The speaker's statement is brief and lacks conciseness.
+- system reason: The speaker does not display withdrawnness in their own words.
 
 ### `missed_abstention` - c05_sarcastic / Enthusiasm
 - expected: **insufficient_evidence**, got: **scored 4**
 - reference rationale: The upbeat tone is sarcastic. Literal wording must not be read as genuine enthusiasm.
-- system reason: The speaker expresses enthusiasm through their boastful and emphatic statement.
+- system reason: The speaker uses exaggerated and emphatic language to express their enthusiasm about being a great communicator.
+
+### `score_disagreement` - c08_impulsive / Impulsivity
+- expected: **scored 4**, got: **scored 1**
+- reference rationale: 'booked the flight about an hour after' + 'didn't really think it through' - explicit, self-described impulsive act.
+- system reason: The speaker minimally expressed a lack of careful consideration before acting.
 
 ### `false_abstention` - c08_impulsive / Adventure-Seeking Behavior
 - expected: **scored 3**, got: **insufficient_evidence**
 - reference rationale: Spontaneous travel is moderate evidence of adventure-seeking.
-- system reason: The speaker does not mention any adventurous behavior or preferences.
-
-### `false_abstention` - c08_impulsive / Decision-making decisiveness
-- expected: **scored 3**, got: **insufficient_evidence**
-- reference rationale: Decided fast. Decisiveness and impulsivity overlap here; moderate is the defensible level.
-- system reason: The speaker does not demonstrate decisiveness in their decision-making process.
+- system reason: The speaker does not explicitly describe acting in ways characteristic of adventure-seeking behavior.
 
 ### `missed_abstention` - c09_orderly / Self-improvement
 - expected: **insufficient_evidence**, got: **scored 4**
 - reference rationale: Planning is described; nothing states a goal of improving oneself.
-- system reason: The speaker emphasizes the importance of their planned activities, indicating a strong drive for self-improvement through structured planning.
+- system reason: The speaker demonstrates a strong commitment to their planned activities, indicating a self-improvement disposition.
 
-### `missed_abstention` - h01_tired / Withdrawnness
-- expected: **insufficient_evidence**, got: **scored 3**
-- reference rationale: Exhaustion is described; social withdrawal is not.
-- system reason: The speaker reports persistent fatigue and difficulty getting through the day, which suggests a withdrawnness from daily activities.
+### `score_disagreement` - h02_saving / Self-improvement
+- expected: **scored 2**, got: **scored 4**
+- reference rationale: A deliberate behaviour change is described, but briefly and in one domain. Weak.
+- system reason: The speaker explicitly states their efforts in cutting expenses and saving money, indicating a clear self-improvement effort.
 
 ## Per-conversation detail
 
@@ -151,33 +128,34 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Big Five facet Openness - Artistic Int | `insufficient_evidence` |  | 0.50 | llm |  |
-| Work Styles | `not_observable` |  | 1.00 | observability_gate |  |
+| Cooperation | `scored` | 4 | 0.80 | llm | I set up a call and we worked through it toge |
+| Decision-making decisiveness | `scored` | 3 | 0.70 | llm | I led a team of five engineers and assigned t |
+| Troubleshooting technical issues | `insufficient_evidence` |  | 0.60 | llm |  |
+| Delegation skills | `scored` | 5 | 0.90 | llm | I led a team of five engineers and assigned t |
+| Evaluating Solutions | `scored` | 3 | 0.70 | llm | When two of them disagreed about the architec |
+| Creativity in solutions | `insufficient_evidence` |  | 0.50 | llm |  |
+| Collaboration | `scored` | 3 | 0.80 | llm | I led a team of five engineers and assigned t |
+| Decision-making speed | `insufficient_evidence` |  | 0.50 | llm |  |
+| Synthesis of information | `scored` | 3 | 0.70 | llm | When two of them disagreed about the architec |
+| Creative resilience | `insufficient_evidence` |  | 0.50 | llm |  |
+| Desire to influence others | `scored` | 4 | 0.80 | llm | I led a team of five engineers and assigned t |
+| Decision-Making Confidence | `scored` | 4 | 0.80 | llm | When two of them disagreed about the architec |
 | Relationship Building Themes | `not_observable` |  | 1.00 | observability_gate |  |
-| Decision-making decisiveness | `insufficient_evidence` |  | 0.30 | llm |  |
-| Assertiveness and control in relations | `insufficient_evidence` |  | 0.40 | llm |  |
-| Democratic Leadership | `not_observable` |  | 1.00 | observability_gate |  |
-| Collaboration | `scored` | 5 | 0.80 | llm | I led a team of five engineers and assigned t |
-| Synthesis of information | `scored` | 4 | 0.70 | llm | I led a team of five engineers and assigned t |
-| Common-sense | `scored` | 3 | 0.80 | llm | I led a team of five engineers and assigned t |
-| Volunteer Work | `insufficient_evidence` |  | 0.50 | llm |  |
-| Discontentment | `insufficient_evidence` |  | 0.50 | llm |  |
-| Evaluating Solutions | `scored` | 4 | 0.90 | llm | When two of them disagreed about the architec |
-| Risktaking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Determinedness | `scored` | 4 | 0.80 | llm | When two of them disagreed about the architec |
-| Learning through movement | `insufficient_evidence` |  | 0.50 | llm |  |
-| Critical reasoning | `scored` | 3 | 0.80 | llm | I set up a call and we worked through it toge |
-| Creativity in solutions | `scored` | 3 | 0.80 | llm | I led a team of five engineers and assigned t |
-| Cooperation | `scored` | 4 | 0.90 | llm | When two of them disagreed about the architec |
-| Pure Challenge | `insufficient_evidence` |  | 0.50 | llm |  |
-| Innovation and Creativity Components | `not_observable` |  | 1.00 | observability_gate |  |
-| Hesitation | `insufficient_evidence` |  | 0.50 | llm |  |
-| Acidity | `insufficient_evidence` |  | 0.50 | llm |  |
-| Hardworking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Working Memory Index | `not_observable` |  | 1.00 | observability_gate |  |
-| Delegation skills | `scored` | 3 | 0.90 | llm | I led a team of five engineers and assigned t |
+| Delegation Ability | `scored` | 5 | 1.00 | llm | I led a team of five engineers and assigned t |
+| Leadership Styles | `not_observable` |  | 1.00 | observability_gate |  |
+| Critical reasoning | `scored` | 3 | 0.70 | llm | When two of them disagreed about the architec |
+| Intellect | `scored` | 4 | 0.80 | llm | When two of them disagreed about the architec |
+| Esteem Needs | `insufficient_evidence` |  | 0.80 | llm |  |
+| Need for Achievement level | `insufficient_evidence` |  | 0.70 | llm |  |
+| Mentalizing network activation | `insufficient_evidence` |  | 0.60 | llm |  |
+| Disagreeableness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Big Five facet Openness - Artistic Int | `insufficient_evidence` |  | 0.90 | llm |  |
+| Universalism | `insufficient_evidence` |  | 0.80 | llm |  |
+| Contribution to Group Goals | `not_observable` |  | 1.00 | observability_gate |  |
+| Leadership Styles and Behaviors | `not_observable` |  | 1.00 | observability_gate |  |
+| Assertiveness and control in relations | `scored` | 4 | 0.90 | llm | I led a team of five engineers and assigned t |
 | FSH level | `not_observable` |  | 1.00 | observability_gate |  |
-| Talkativeness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Talkativeness | `insufficient_evidence` |  | 0.70 | llm |  |
 | Intelligence Quotient (IQ) | `not_observable` |  | 1.00 | observability_gate |  |
 
 ### `c02_ambiguous`
@@ -186,33 +164,32 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
+| Social Interaction Skills | `scored` | 3 | 0.80 | llm | I guess I'm pretty good at working with peopl |
+| Delegation skills | `insufficient_evidence` |  | 1.00 | llm |  |
+| Collaboration | `scored` | 3 | 0.80 | llm | I guess I'm pretty good at working with peopl |
+| Cooperation | `scored` | 3 | 0.80 | llm | I guess I'm pretty good at working with peopl |
+| Cordiality | `scored` | 3 | 0.80 | llm | I guess I'm pretty good at working with peopl |
+| Social Desirability Bias | `insufficient_evidence` |  | 0.50 | llm |  |
 | Volunteer Work | `insufficient_evidence` |  | 0.50 | llm |  |
-| Assertiveness and control in relations | `insufficient_evidence` |  | 0.40 | llm |  |
-| Work Styles | `not_observable` |  | 1.00 | observability_gate |  |
-| Openness | `insufficient_evidence` |  | 0.30 | llm |  |
-| Common-sense | `insufficient_evidence` |  | 0.60 | llm |  |
-| Social Desirability tendency | `insufficient_evidence` |  | 0.70 | llm |  |
-| Self-improvement | `insufficient_evidence` |  | 0.50 | llm |  |
-| Collaboration | `insufficient_evidence` |  | 0.30 | llm |  |
-| Naivety | `insufficient_evidence` |  | 0.40 | llm |  |
-| Social Interaction Skills | `insufficient_evidence` |  | 0.20 | llm |  |
-| Hardworking | `error` |  | 0.00 | parser |  |
+| Social Desirability tendency | `insufficient_evidence` |  | 0.50 | llm |  |
+| Hardworking | `insufficient_evidence` |  | 0.50 | llm |  |
 | Social Boldness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Unassertiveness | `scored` | 3 | 0.80 | llm | I don't really think about it much. |
-| Discontentment | `insufficient_evidence` |  | 0.50 | llm |  |
-| Acidity | `insufficient_evidence` |  | 0.50 | llm |  |
-| Encouraging participation | `insufficient_evidence` |  | 0.50 | llm |  |
-| Risktaking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Overprotectiveness | `insufficient_evidence` |  | 0.50 | llm |  |
-| SelfEsteem | `insufficient_evidence` |  | 0.50 | llm |  |
-| Delegation skills | `insufficient_evidence` |  | 0.50 | llm |  |
-| Working Memory Index | `not_observable` |  | 1.00 | observability_gate |  |
-| Compassion | `insufficient_evidence` |  | 0.50 | llm |  |
-| Cunningness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Hesitation | `insufficient_evidence` |  | 0.50 | llm |  |
+| Compassion | `insufficient_evidence` |  | 0.70 | llm |  |
+| Civility | `insufficient_evidence` |  | 0.70 | llm |  |
+| Troubleshooting technical issues | `insufficient_evidence` |  | 0.70 | llm |  |
+| Encouraging participation | `insufficient_evidence` |  | 0.70 | llm |  |
+| Openness | `insufficient_evidence` |  | 0.70 | llm |  |
 | Hostility | `insufficient_evidence` |  | 0.50 | llm |  |
+| Need for social interaction | `insufficient_evidence` |  | 0.50 | llm |  |
+| Assertiveness and control in relations | `insufficient_evidence` |  | 0.50 | llm |  |
+| Trust in others | `insufficient_evidence` |  | 0.50 | llm |  |
+| Flawlessness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Cognitive Empathy | `insufficient_evidence` |  | 0.50 | llm |  |
+| Exemplariness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Unassertiveness | `scored` | 2 | 0.80 | llm | I don't really think about it much. |
+| Decision-Making Confidence | `insufficient_evidence` |  | 0.60 | llm |  |
+| Honesty-Humility | `insufficient_evidence` |  | 0.50 | llm |  |
 | Nationality | `not_observable` |  | 1.00 | observability_gate |  |
-| Cooperation | `insufficient_evidence` |  | 0.50 | llm |  |
 
 ### `c03_contradictory`
 
@@ -220,33 +197,32 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
+| Collaboration | `scored` | 3 | 0.80 | llm | I dislike teamwork and I avoid group projects |
 | Contribution to Group Goals | `not_observable` |  | 1.00 | observability_gate |  |
-| Avoiding | `not_observable` |  | 1.00 | observability_gate |  |
-| Risktaking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Pure Challenge | `insufficient_evidence` |  | 0.50 | llm |  |
-| Collaboration | `insufficient_evidence` |  | 0.50 | llm |  |
-| Self-improvement | `insufficient_evidence` |  | 0.50 | llm |  |
-| Hardworking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Encouraging participation | `insufficient_evidence` |  | 0.50 | llm |  |
-| Discontentment | `scored` | 3 | 0.80 | llm | I dislike teamwork and I avoid group projects |
-| Creative risk-taking tendency | `insufficient_evidence` |  | 0.50 | llm |  |
-| Digital-nomad months | `not_observable` |  | 1.00 | observability_gate |  |
+| Cooperation | `insufficient_evidence` |  | 0.80 | evidence_verifier | I disliked teamwork and I avoid group project |
+| Encouraging participation | `insufficient_evidence` |  | 0.90 | llm |  |
 | Peer-collaboration hours | `not_observable` |  | 1.00 | observability_gate |  |
-| Organized lifestyle | `insufficient_evidence` |  | 0.50 | llm |  |
-| Meeting Deadlines | `insufficient_evidence` |  | 0.50 | llm |  |
-| Common-sense | `insufficient_evidence` |  | 0.80 | llm |  |
-| Democratic Leadership | `not_observable` |  | 1.00 | observability_gate |  |
-| Social Boldness | `insufficient_evidence` |  | 0.70 | llm |  |
-| Creativity in solutions | `insufficient_evidence` |  | 0.60 | llm |  |
-| Naivety | `insufficient_evidence` |  | 0.80 | llm |  |
-| Acidity | `insufficient_evidence` |  | 0.50 | llm |  |
-| Assertiveness and control in relations | `scored` | 2 | 0.90 | llm | I dislike teamwork and I avoid group projects |
-| Decision-making decisiveness | `scored` | 3 | 0.80 | llm | That said, I ran our product team for six mon |
-| Hesitation | `insufficient_evidence` |  | 0.30 | llm |  |
-| Aloofness | `scored` | 2 | 0.70 | llm | I dislike teamwork and I avoid group projects |
-| Emotionalism | `insufficient_evidence` |  | 0.40 | llm |  |
-| Withdrawnness | `scored` | 4 | 0.90 | llm | I dislike teamwork and I avoid group projects |
-| Cooperation | `scored` | 2 | 0.80 | llm | I dislike teamwork and I avoid group projects |
+| Participation in Community Activities | `insufficient_evidence` |  | 0.90 | llm |  |
+| Creativity in solutions | `error` |  | 0.00 | parser |  |
+| Desire to influence others | `insufficient_evidence` |  | 0.50 | llm |  |
+| Hardworking | `insufficient_evidence` |  | 0.30 | llm |  |
+| Volunteer Work | `insufficient_evidence` |  | 0.40 | llm |  |
+| Meeting Deadlines | `insufficient_evidence` |  | 0.40 | llm |  |
+| Organized lifestyle | `insufficient_evidence` |  | 0.30 | llm |  |
+| Perseverance | `insufficient_evidence` |  | 0.50 | llm |  |
+| Creative resilience | `insufficient_evidence` |  | 0.40 | llm |  |
+| Creative risk-taking tendency | `insufficient_evidence` |  | 0.30 | llm |  |
+| Patience: Resistance to anger | `insufficient_evidence` |  | 0.20 | llm |  |
+| Individuality | `scored` | 3 | 0.80 | llm | I dislike teamwork and I avoid group projects |
+| Social Boldness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Alignment with societal roles | `insufficient_evidence` |  | 0.40 | llm |  |
+| Gamified-finance-app usage | `insufficient_evidence` |  | 0.30 | llm |  |
+| Big Five facet Openness - Artistic Int | `insufficient_evidence` |  | 0.40 | llm |  |
+| Pure Challenge | `insufficient_evidence` |  | 0.30 | llm |  |
+| Evaluating Solutions | `insufficient_evidence` |  | 0.80 | llm |  |
+| Disagreeableness | `scored` | 4 | 0.90 | llm | I dislike teamwork and I avoid group projects |
+| Attitude toward learning | `insufficient_evidence` |  | 0.80 | llm |  |
+| Withdrawnness | `scored` | 3 | 0.90 | llm | I dislike teamwork and I avoid group projects |
 | Sleep Apnea | `not_observable` |  | 1.00 | observability_gate |  |
 
 ### `c04_quoted`
@@ -256,31 +232,31 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
 | Assertiveness and control in relations | `insufficient_evidence` |  | 0.50 | llm |  |
-| Aloofness | `scored` | 2 | 0.80 | llm | I don't really see it myself. |
-| Cunningness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Acidity | `insufficient_evidence` |  | 0.50 | llm |  |
-| Hesitation | `scored` | 3 | 0.80 | llm | In meetings I usually just go along with what |
-| Determinedness | `insufficient_evidence` |  | 0.50 | llm |  |
-| HonestyHumility | `not_observable` |  | 1.00 | observability_gate |  |
-| Naivety | `scored` | 4 | 0.90 | llm | I don't really see it myself. |
-| Genuine | `insufficient_evidence` |  | 0.70 | evidence_verifier | My manager said, 'You're the most assertive p |
-| Self-improvement | `insufficient_evidence` |  | 0.50 | llm |  |
-| Submissiveness | `scored` | 3 | 0.80 | llm | In meetings I usually just go along with what |
-| Social Boldness | `insufficient_evidence` |  | 0.60 | llm |  |
-| Meeting Deadlines | `insufficient_evidence` |  | 0.50 | llm |  |
-| Passive-Aggressive | `insufficient_evidence` |  | 0.40 | llm |  |
-| Risktaking | `insufficient_evidence` |  | 0.30 | llm |  |
-| SelfEsteem | `scored` | 1 | 0.60 | llm | I don't really see it myself. |
-| Democratic Leadership | `not_observable` |  | 1.00 | observability_gate |  |
-| Disrespect | `insufficient_evidence` |  | 0.50 | llm |  |
-| Self Perspective | `scored` | 2 | 0.80 | llm | "I don't really see it myself" |
-| Common-sense | `scored` | 3 | 0.90 | llm | "In meetings I usually just go along with wha |
-| Outspokenness | `insufficient_evidence` |  | 0.40 | llm |  |
-| Decision-making decisiveness | `scored` | 2 | 0.70 | llm | "In meetings I usually just go along with wha |
-| Structure | `insufficient_evidence` |  | 0.50 | llm |  |
-| Unassertiveness | `scored` | 3 | 0.80 | llm | In meetings I usually just go along with what |
-| Self-righteousness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Withdrawnness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Outspokenness | `insufficient_evidence` |  | 0.30 | llm |  |
+| Disagreeableness | `insufficient_evidence` |  | 0.40 | llm |  |
+| Brazenness | `insufficient_evidence` |  | 0.30 | llm |  |
+| Meeting Deadlines | `insufficient_evidence` |  | 0.20 | llm |  |
+| Social Boldness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Delegation skills | `insufficient_evidence` |  | 0.30 | llm |  |
+| Self-righteousness | `insufficient_evidence` |  | 0.30 | llm |  |
+| Honesty-Humility | `insufficient_evidence` |  | 0.40 | llm |  |
+| Patience: Resistance to anger | `insufficient_evidence` |  | 0.40 | llm |  |
+| Frankness | `scored` | 3 | 0.90 | llm | I don't really see it myself. |
+| Tendency Toward Compromise or Confront | `scored` | 1 | 0.80 | llm |  |
+| Hostility | `insufficient_evidence` |  | 0.70 | llm |  |
+| Managing emotions | `insufficient_evidence` |  | 0.70 | llm |  |
+| Excuse-Making tendency | `insufficient_evidence` |  | 0.70 | llm |  |
+| Leadership Styles and Behaviors | `not_observable` |  | 1.00 | observability_gate |  |
+| Exemplariness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Cantankerousness | `insufficient_evidence` |  | 0.40 | llm |  |
+| Leadership Styles | `not_observable` |  | 1.00 | observability_gate |  |
+| Decency | `insufficient_evidence` |  | 0.60 | llm |  |
+| Aloofness | `insufficient_evidence` |  | 0.30 | llm |  |
+| Trust in others | `insufficient_evidence` |  | 0.70 | llm |  |
+| Submissiveness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Desire to influence others | `insufficient_evidence` |  | 0.80 | llm |  |
+| Impartial-mindedness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Withdrawnness | `insufficient_evidence` |  | 0.80 | llm |  |
 | Basophil count | `not_observable` |  | 1.00 | observability_gate |  |
 
 ### `c05_sarcastic`
@@ -289,35 +265,35 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Common-sense | `insufficient_evidence` |  | 0.80 | llm |  |
-| Naivety | `insufficient_evidence` |  | 0.80 | llm |  |
-| Assertiveness and control in relations | `insufficient_evidence` |  | 0.80 | llm |  |
-| Collaboration | `insufficient_evidence` |  | 0.80 | llm |  |
-| Synthesis of information | `insufficient_evidence` |  | 0.80 | llm |  |
-| Encouraging participation | `insufficient_evidence` |  | 0.50 | llm |  |
-| Risktaking | `insufficient_evidence` |  | 0.30 | llm |  |
-| Sustainable-transport usage | `insufficient_evidence` |  | 0.20 | llm |  |
-| Aloofness | `insufficient_evidence` |  | 0.40 | llm |  |
-| Social Boldness | `insufficient_evidence` |  | 0.60 | llm |  |
-| Critical reasoning | `insufficient_evidence` |  | 0.50 | llm |  |
-| Need for social interaction | `insufficient_evidence` |  | 0.30 | llm |  |
-| Acidity | `insufficient_evidence` |  | 0.20 | llm |  |
-| Overprotectiveness | `insufficient_evidence` |  | 0.10 | llm |  |
-| Disrespect | `insufficient_evidence` |  | 0.40 | llm |  |
-| Decision-making decisiveness | `insufficient_evidence` |  | 0.80 | llm |  |
-| Sleep-environment temperature | `not_observable` |  | 1.00 | observability_gate |  |
 | Cooperation | `insufficient_evidence` |  | 0.80 | llm |  |
-| Democratic Leadership | `not_observable` |  | 1.00 | observability_gate |  |
-| Relationship Building Themes | `not_observable` |  | 1.00 | observability_gate |  |
-| Cunningness | `insufficient_evidence` |  | 0.80 | llm |  |
-| Social Interaction Skills | `insufficient_evidence` |  | 0.80 | llm |  |
+| Collaboration | `insufficient_evidence` |  | 0.80 | llm |  |
 | Mentalizing network activation | `insufficient_evidence` |  | 0.80 | llm |  |
-| Inattentiveness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Troubleshooting technical issues | `insufficient_evidence` |  | 0.80 | llm |  |
+| Encouraging participation | `insufficient_evidence` |  | 0.80 | llm |  |
+| Synthesis of information | `insufficient_evidence` |  | 0.70 | llm |  |
 | Cognitive Empathy | `insufficient_evidence` |  | 0.70 | llm |  |
-| Enthusiasm | `scored` | 4 | 0.80 | llm | Oh absolutely, I'm the world's greatest commu |
-| Brevity | `scored` | 1 | 0.90 | llm | I once explained a deploy plan so clearly tha |
+| Common-sense | `insufficient_evidence` |  | 0.70 | llm |  |
+| Need for social interaction | `insufficient_evidence` |  | 0.70 | llm |  |
+| Courageousness | `insufficient_evidence` |  | 0.70 | llm |  |
+| Travel-companions diversity | `insufficient_evidence` |  | 0.50 | llm |  |
+| Social Boldness | `scored` | 2 | 0.80 | llm | Oh absolutely, I'm the world's greatest commu |
+| Home-security-system presence | `insufficient_evidence` |  | 0.50 | llm |  |
+| Storytelling proficiency | `scored` | 3 | 0.90 | llm | I once explained a deploy plan so clearly tha |
+| Sustainable-transport usage | `insufficient_evidence` |  | 0.50 | llm |  |
+| Comprehension of spoken information | `insufficient_evidence` |  | 0.50 | llm |  |
+| Critical reasoning | `insufficient_evidence` |  | 0.50 | llm |  |
+| Outspokenness | `scored` | 4 | 0.90 | llm | Oh absolutely, I'm the world's greatest commu |
+| Cordiality | `insufficient_evidence` |  | 0.50 | llm |  |
+| Social Interaction Skills | `insufficient_evidence` |  | 0.50 | llm |  |
+| Intellect | `insufficient_evidence` |  | 0.80 | llm |  |
+| Contribution to Group Goals | `not_observable` |  | 1.00 | observability_gate |  |
+| Creativity in solutions | `insufficient_evidence` |  | 0.80 | llm |  |
+| Alignment with societal roles | `insufficient_evidence` |  | 0.80 | llm |  |
+| Sensationalism | `insufficient_evidence` |  | 0.80 | llm |  |
+| Enthusiasm | `scored` | 4 | 0.90 | llm | Oh absolutely, I'm the world's greatest commu |
+| Brevity | `insufficient_evidence` |  | 0.80 | llm |  |
 | Parathyroid-hormone level | `not_observable` |  | 1.00 | observability_gate |  |
-| Talkativeness | `scored` | 5 | 0.90 | llm | Oh absolutely, I'm the world's greatest commu |
+| Talkativeness | `insufficient_evidence` |  | 0.80 | llm |  |
 
 ### `c06_codeswitched`
 
@@ -325,32 +301,32 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Time Orientation End Points | `not_observable` |  | 1.00 | observability_gate |  |
-| Language use | `scored` | 3 | 0.80 | llm | Team meeting mein maine sabka opinion suna, p |
-| Genuine | `scored` | 4 | 0.90 | llm | By the end everyone was genuinely on board. |
-| Relationship Building Themes | `not_observable` |  | 1.00 | observability_gate |  |
-| Democratic Leadership | `not_observable` |  | 1.00 | observability_gate |  |
-| Role of Spirituality in Community Invo | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Openness | `scored` | 4 | 0.85 | llm | Team meeting mein maine sabka opinion suna, p |
-| Innovation and Creativity Components | `not_observable` |  | 1.00 | observability_gate |  |
-| Synthesis of information | `scored` | 4 | 0.90 | llm | hum sab ne milkar decide kiya ki naya archite |
-| Common-sense | `scored` | 4 | 0.80 | llm | Team meeting mein maine sabka opinion suna, p |
 | Big Five facet Openness - Artistic Int | `insufficient_evidence` |  | 0.50 | llm |  |
-| Decision-making decisiveness | `scored` | 3 | 0.80 | llm | hum sab ne milkar decide kiya |
-| Meeting Deadlines | `insufficient_evidence` |  | 0.50 | llm |  |
-| Work Styles | `not_observable` |  | 1.00 | observability_gate |  |
 | Creativity in solutions | `insufficient_evidence` |  | 0.50 | llm |  |
-| Critical reasoning | `insufficient_evidence` |  | 0.50 | llm |  |
-| Structure | `insufficient_evidence` |  | 0.80 | llm |  |
-| Encouraging participation | `scored` | 3 | 0.90 | llm | maine sabka opinion suna, phir hum sab ne mil |
-| Use of Nature as a Stress Reliever | `insufficient_evidence` |  | 0.70 | llm |  |
-| Affiliation Motivation | `not_observable` |  | 1.00 | observability_gate |  |
-| Risktaking | `insufficient_evidence` |  | 0.60 | llm |  |
-| Naivety | `insufficient_evidence` |  | 0.50 | llm |  |
+| Synthesis of information | `scored` | 4 | 0.90 | llm | sabka opinion suna, phir hum sab ne milkar de |
+| Role of Spirituality in Community Invo | `policy_blocked` |  | 1.00 | policy_gate |  |
+| Cooperation | `scored` | 5 | 1.00 | llm | sabka opinion suna, phir hum sab ne milkar de |
 | Originality | `insufficient_evidence` |  | 0.50 | llm |  |
-| Cooperation | `scored` | 4 | 0.90 | llm | sabka opinion suna, phir hum sab ne milkar de |
-| HonestyHumility | `not_observable` |  | 1.00 | observability_gate |  |
-| Collaboration | `scored` | 5 | 1.00 | llm | sabka opinion suna, phir hum sab ne milkar de |
+| Innovation and Creativity Components | `not_observable` |  | 1.00 | observability_gate |  |
+| Relationship Building Themes | `not_observable` |  | 1.00 | observability_gate |  |
+| Kirtan participation frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Eightfold Path - Right Intention level | `policy_blocked` |  | 1.00 | policy_gate |  |
+| Ideas generated/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Critical reasoning | `insufficient_evidence` |  | 0.30 | llm |  |
+| Encouraging participation | `scored` | 4 | 0.80 | llm | maine sabka opinion suna |
+| Intellect | `insufficient_evidence` |  | 0.20 | llm |  |
+| Decision-making decisiveness | `scored` | 3 | 0.60 | llm | hum sab ne milkar decide kiya |
+| Sentence Structure | `scored` | 3 | 0.70 | llm | Team meeting mein maine sabka opinion suna, p |
+| Work Styles | `not_observable` |  | 1.00 | observability_gate |  |
+| Openness | `scored` | 4 | 0.80 | llm | hum sab ne milkar decide kiya |
+| Time Orientation End Points | `not_observable` |  | 1.00 | observability_gate |  |
+| Leadership Styles | `not_observable` |  | 1.00 | observability_gate |  |
+| Evaluating Solutions | `scored` | 3 | 0.70 | llm | hum sab ne milkar decide kiya |
+| Dhikr repetitions / day | `not_observable` |  | 1.00 | observability_gate |  |
+| Desire to influence others | `insufficient_evidence` |  | 0.50 | llm |  |
+| Language use | `scored` | 3 | 0.80 | llm | Team meeting mein maine sabka opinion suna |
+| Leadership Styles and Behaviors | `not_observable` |  | 1.00 | observability_gate |  |
+| Collaboration | `scored` | 5 | 0.90 | llm | Team meeting mein maine sabka opinion suna, p |
 | Nationality | `not_observable` |  | 1.00 | observability_gate |  |
 
 ### `c07_low_evidence`
@@ -359,33 +335,35 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
+| Troubleshooting technical issues | `insufficient_evidence` |  | 0.80 | llm |  |
 | Discernment practice hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Moroseness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Dance rehearsal hours/week | `not_observable` |  | 1.00 | observability_gate |  |
-| Public-transport km/week | `not_observable` |  | 1.00 | observability_gate |  |
-| Happiness | `insufficient_evidence` |  | 0.50 | llm |  |
-| General Mood and Attitude | `insufficient_evidence` |  | 0.50 | llm |  |
-| Contentment Levels | `insufficient_evidence` |  | 0.50 | llm |  |
-| Blissfulness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Discontentment | `insufficient_evidence` |  | 0.50 | llm |  |
-| Irritability | `insufficient_evidence` |  | 0.50 | llm |  |
 | Negative Affect Frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Moroseness | `scored` | 1 | 0.90 | llm | Things are okay. Not much to report this week |
 | Feedback-giving frequency | `not_observable` |  | 1.00 | observability_gate |  |
-| Compassion Fatigue | `not_observable` |  | 1.00 | observability_gate |  |
-| Boredom Susceptibility | `insufficient_evidence` |  | 0.50 | llm |  |
-| Joyfulness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Tiferet | `not_observable` |  | 1.00 | observability_gate |  |
-| Enthusiasm | `insufficient_evidence` |  | 0.50 | llm |  |
+| Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
+| Sukkot lulav-shaking days | `not_observable` |  | 1.00 | observability_gate |  |
+| Happiness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Dance rehearsal hours/week | `not_observable` |  | 1.00 | observability_gate |  |
+| General Mood and Attitude | `scored` | 1 | 0.90 | llm | Things are okay. Not much to report this week |
+| Ideas generated/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Public-transport km/week | `not_observable` |  | 1.00 | observability_gate |  |
+| Shabbat candle-lighting consistency | `not_observable` |  | 1.00 | observability_gate |  |
+| Breakfast-skipping frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Time outdoors/day (h) | `not_observable` |  | 1.00 | observability_gate |  |
+| Contentment Levels | `scored` | 2 | 0.90 | llm | Things are okay. Not much to report this week |
 | Depression Symptoms | `not_observable` |  | 1.00 | observability_gate |  |
-| Peacefulness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Merriness | `insufficient_evidence` |  | 0.50 | llm |  |
-| HonestyHumility | `not_observable` |  | 1.00 | observability_gate |  |
+| Cantankerousness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Dhikr repetitions / day | `not_observable` |  | 1.00 | observability_gate |  |
 | Orderliness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Managing emotions | `insufficient_evidence` |  | 0.50 | llm |  |
-| Troubleshooting technical issues | `insufficient_evidence` |  | 0.50 | llm |  |
+| Wake-time consistency | `not_observable` |  | 1.00 | observability_gate |  |
+| Open-source contributions | `not_observable` |  | 1.00 | observability_gate |  |
+| Compassion Fatigue | `not_observable` |  | 1.00 | observability_gate |  |
+| Blissfulness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Vision-check frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Enthusiasm | `insufficient_evidence` |  | 0.50 | llm |  |
 | Subscription count | `not_observable` |  | 1.00 | observability_gate |  |
-| Collaboration | `insufficient_evidence` |  | 0.80 | llm |  |
+| Collaboration | `insufficient_evidence` |  | 0.50 | llm |  |
+| Irritability | `insufficient_evidence` |  | 0.50 | llm |  |
 
 ### `c08_impulsive`
 
@@ -393,33 +371,33 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Risktaking | `scored` | 3 | 0.80 | llm | Didn't really think it through, I just wanted |
-| Ideas generated/day | `not_observable` |  | 1.00 | observability_gate |  |
-| Seerah study hours | `not_observable` |  | 1.00 | observability_gate |  |
+| Decision-making speed | `scored` | 2 | 0.80 | llm | I booked the flight about an hour after someo |
+| Decision-Making Confidence | `scored` | 1 | 0.60 | llm | Didn't really think it through, I just wanted |
+| Troubleshooting technical issues | `insufficient_evidence` |  | 0.20 | llm |  |
+| Risktaking | `scored` | 3 | 0.90 | llm | Didn't really think it through, I just wanted |
+| Creative risk-taking tendency | `insufficient_evidence` |  | 0.10 | llm |  |
+| Decision-making decisiveness | `scored` | 2 | 0.80 | llm | Didn't really think it through, I just wanted |
 | Statistical Reasoning | `not_observable` |  | 1.00 | observability_gate |  |
-| Bhagavad-Gita study hours | `not_observable` |  | 1.00 | observability_gate |  |
-| Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Adventure-Seeking Behavior | `insufficient_evidence` |  | 0.60 | llm |  |
-| Peer-collaboration hours | `not_observable` |  | 1.00 | observability_gate |  |
-| Dance rehearsal hours/week | `not_observable` |  | 1.00 | observability_gate |  |
-| Zohar (Kabbalah) study hours | `not_observable` |  | 1.00 | observability_gate |  |
-| Eco-tourism trips | `insufficient_evidence` |  | 0.50 | llm |  |
-| Pilgrimage participation count | `not_observable` |  | 1.00 | observability_gate |  |
-| Decision-making decisiveness | `insufficient_evidence` |  | 0.60 | llm |  |
-| Creative risk-taking tendency | `insufficient_evidence` |  | 0.50 | llm |  |
-| Openness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Learning through movement | `insufficient_evidence` |  | 0.50 | llm |  |
-| Critical reasoning | `insufficient_evidence` |  | 0.50 | llm |  |
-| Soft-skill training hours | `not_observable` |  | 1.00 | observability_gate |  |
-| Synthesis of information | `insufficient_evidence` |  | 0.50 | llm |  |
-| Discernment practice hours / week | `not_observable` |  | 1.00 | observability_gate |  |
 | Perceiving | `insufficient_evidence` |  | 0.50 | llm |  |
-| Pure Challenge | `insufficient_evidence` |  | 0.50 | llm |  |
-| Decision-making speed | `insufficient_evidence` |  | 0.50 | llm |  |
-| Hesitation | `insufficient_evidence` |  | 0.50 | llm |  |
-| Spatial perception | `not_observable` |  | 1.00 | observability_gate |  |
+| Critical reasoning | `insufficient_evidence` |  | 0.50 | llm |  |
+| Pilgrimage participation count | `not_observable` |  | 1.00 | observability_gate |  |
+| Eco-tourism trips | `insufficient_evidence` |  | 0.50 | llm |  |
+| Synthesis of information | `insufficient_evidence` |  | 0.50 | llm |  |
+| Commute time/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Evaluating Solutions | `insufficient_evidence` |  | 0.80 | llm |  |
+| Seerah study hours | `not_observable` |  | 1.00 | observability_gate |  |
+| Adventure-Seeking Behavior | `insufficient_evidence` |  | 0.60 | llm |  |
+| Ideas generated/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Understanding Mathematical Concepts | `not_observable` |  | 1.00 | observability_gate |  |
+| Originality | `insufficient_evidence` |  | 0.70 | llm |  |
+| Ridván festival participation | `not_observable` |  | 1.00 | observability_gate |  |
+| Numerical Reasoning | `not_observable` |  | 1.00 | observability_gate |  |
+| Significance: Desire to make an impact | `insufficient_evidence` |  | 0.50 | llm |  |
+| Creativity in solutions | `insufficient_evidence` |  | 0.60 | llm |  |
+| Estimating Calculations | `not_observable` |  | 1.00 | observability_gate |  |
+| Big Five facet Openness - Artistic Int | `insufficient_evidence` |  | 0.50 | llm |  |
 | Passport-stamps count | `not_observable` |  | 1.00 | observability_gate |  |
-| Impulsivity | `scored` | 4 | 0.80 | llm | Didn't really think it through, I just wanted |
+| Impulsivity | `scored` | 1 | 0.80 | llm | Didn't really think it through, I just wanted |
 
 ### `c09_orderly`
 
@@ -427,34 +405,33 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
+| Breakfast-skipping frequency | `not_observable` |  | 1.00 | observability_gate |  |
 | Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
 | Dance rehearsal hours/week | `not_observable` |  | 1.00 | observability_gate |  |
 | Discernment practice hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Public-transport km/week | `not_observable` |  | 1.00 | observability_gate |  |
-| Eating Habits (Home-Cooked vs. Eating  | `insufficient_evidence` |  | 0.50 | llm |  |
-| Preference for Home-Cooked vs Restaura | `insufficient_evidence` |  | 0.50 | llm |  |
-| Dance-cardio sessions | `not_observable` |  | 1.00 | observability_gate |  |
-| Training-cycle length | `not_observable` |  | 1.00 | observability_gate |  |
-| Compassion Fatigue | `not_observable` |  | 1.00 | observability_gate |  |
-| Pilgrimage participation count | `not_observable` |  | 1.00 | observability_gate |  |
-| Statistical Reasoning | `not_observable` |  | 1.00 | observability_gate |  |
-| Breakfast-skipping frequency | `not_observable` |  | 1.00 | observability_gate |  |
-| Negative Affect Frequency | `not_observable` |  | 1.00 | observability_gate |  |
-| Specialist | `insufficient_evidence` |  | 0.50 | llm |  |
-| Relationship Building Themes | `not_observable` |  | 1.00 | observability_gate |  |
-| Discontentment | `insufficient_evidence` |  | 0.50 | llm |  |
-| Subscription count | `not_observable` |  | 1.00 | observability_gate |  |
-| Peer-collaboration hours | `not_observable` |  | 1.00 | observability_gate |  |
 | Kirtan participation frequency | `not_observable` |  | 1.00 | observability_gate |  |
-| Risktaking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Observing | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Naivety | `insufficient_evidence` |  | 0.50 | llm |  |
-| Acidity | `insufficient_evidence` |  | 0.50 | llm |  |
-| Feedback-giving frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Dance-cardio sessions | `not_observable` |  | 1.00 | observability_gate |  |
+| Dhikr repetitions / day | `not_observable` |  | 1.00 | observability_gate |  |
 | Bhagavad-Gita study hours | `not_observable` |  | 1.00 | observability_gate |  |
-| Self-improvement | `scored` | 4 | 0.80 | llm | If it isn't on the list, it doesn't happen. |
-| Orderliness | `scored` | 5 | 0.90 | llm | Every Sunday evening I lay out the whole week |
+| Ideas generated/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Commute time/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Processed-food frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Seerah study hours | `not_observable` |  | 1.00 | observability_gate |  |
+| Time outdoors/day (h) | `not_observable` |  | 1.00 | observability_gate |  |
+| Public-transport km/week | `not_observable` |  | 1.00 | observability_gate |  |
+| Training-cycle length | `not_observable` |  | 1.00 | observability_gate |  |
+| Peer-collaboration hours | `not_observable` |  | 1.00 | observability_gate |  |
 | Caffeine intake (mg/day) | `not_observable` |  | 1.00 | observability_gate |  |
+| Wake-time consistency | `not_observable` |  | 1.00 | observability_gate |  |
+| Shabbat candle-lighting consistency | `not_observable` |  | 1.00 | observability_gate |  |
+| Zohar (Kabbalah) study hours | `not_observable` |  | 1.00 | observability_gate |  |
+| Sufi retreat attendance count | `not_observable` |  | 1.00 | observability_gate |  |
+| Tiferet | `not_observable` |  | 1.00 | observability_gate |  |
+| Choir participation years | `not_observable` |  | 1.00 | observability_gate |  |
+| Eating Habits (Home-Cooked vs. Eating  | `insufficient_evidence` |  | 0.50 | llm |  |
+| Quran khatam cycles per year | `not_observable` |  | 1.00 | observability_gate |  |
+| Self-improvement | `scored` | 4 | 0.90 | llm | If it isn't on the list, it doesn't happen. |
+| Orderliness | `scored` | 5 | 1.00 | llm | Every Sunday evening I lay out the whole week |
 
 ### `c10_irritable`
 
@@ -462,34 +439,33 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
+| Creative resilience | `insufficient_evidence` |  | 0.50 | llm |  |
+| Troubleshooting technical issues | `insufficient_evidence` |  | 0.40 | llm |  |
+| Need for social interaction | `insufficient_evidence` |  | 0.30 | llm |  |
+| Organized lifestyle | `insufficient_evidence` |  | 0.20 | llm |  |
+| Adventure-Seeking Behavior | `insufficient_evidence` |  | 0.10 | llm |  |
+| Stress Recovery Ability | `insufficient_evidence` |  | 0.70 | llm |  |
 | Persistence | `not_observable` |  | 1.00 | observability_gate |  |
-| Avoiding | `not_observable` |  | 1.00 | observability_gate |  |
-| Adventure-Seeking Behavior | `insufficient_evidence` |  | 0.80 | llm |  |
-| Discontentment | `scored` | 3 | 0.90 | llm | I've been snapping at people over nothing lat |
-| Control over situations | `insufficient_evidence` |  | 0.70 | llm |  |
 | Desperation | `insufficient_evidence` |  | 0.60 | llm |  |
-| Adaptability and Flexibility | `not_observable` |  | 1.00 | observability_gate |  |
-| Work Styles | `not_observable` |  | 1.00 | observability_gate |  |
-| HonestyHumility | `not_observable` |  | 1.00 | observability_gate |  |
-| Organized lifestyle | `insufficient_evidence` |  | 0.50 | llm |  |
-| Submission | `not_observable` |  | 1.00 | observability_gate |  |
-| Motivational Drivers | `not_observable` |  | 1.00 | observability_gate |  |
-| Computer Skills | `not_observable` |  | 1.00 | observability_gate |  |
-| Need for social interaction | `insufficient_evidence` |  | 0.50 | llm |  |
-| Risktaking | `insufficient_evidence` |  | 0.30 | llm |  |
-| Hesitation | `insufficient_evidence` |  | 0.40 | llm |  |
-| Moroseness | `insufficient_evidence` |  | 0.30 | llm |  |
-| Social Desirability tendency | `insufficient_evidence` |  | 0.60 | llm |  |
-| Affiliation Motivation | `not_observable` |  | 1.00 | observability_gate |  |
-| Achievement Motivation | `not_observable` |  | 1.00 | observability_gate |  |
-| Hostility | `insufficient_evidence` |  | 0.50 | llm |  |
+| Hostility | `scored` | 4 | 0.90 | llm | I've been snapping at people over nothing lat |
+| Cordiality | `insufficient_evidence` |  | 0.60 | llm |  |
+| Participation in Community Activities | `insufficient_evidence` |  | 0.50 | llm |  |
+| Clumsiness | `insufficient_evidence` |  | 0.50 | llm |  |
 | Encouraging participation | `insufficient_evidence` |  | 0.30 | llm |  |
-| Conscientiousness (C) | `not_observable` |  | 1.00 | observability_gate |  |
-| Creative resilience | `insufficient_evidence` |  | 0.40 | llm |  |
-| Troubleshooting technical issues | `insufficient_evidence` |  | 0.60 | llm |  |
+| Patience: Resistance to anger | `insufficient_evidence` |  | 0.40 | llm |  |
+| Discontentment | `scored` | 5 | 0.90 | llm | I've been snapping at people over nothing lat |
+| Peer-to-peer lending usage | `insufficient_evidence` |  | 0.60 | llm |  |
+| Avoiding | `not_observable` |  | 1.00 | observability_gate |  |
+| Irritability | `scored` | 5 | 0.90 | llm | I've been snapping at people over nothing lat |
+| Social Desirability tendency | `insufficient_evidence` |  | 0.30 | llm |  |
+| Blog-subscriber count | `not_observable` |  | 1.00 | observability_gate |  |
+| Boredom Susceptibility | `insufficient_evidence` |  | 0.20 | llm |  |
+| Compassion | `insufficient_evidence` |  | 0.20 | llm |  |
+| Mentalizing network activation | `insufficient_evidence` |  | 0.10 | llm |  |
+| Managing emotions | `scored` | 4 | 0.90 | llm | I've been snapping at people over nothing lat |
+| Slothfulness | `insufficient_evidence` |  | 0.50 | llm |  |
 | Compassion Fatigue | `not_observable` |  | 1.00 | observability_gate |  |
-| Withdrawnness | `insufficient_evidence` |  | 0.80 | llm |  |
-| Irritability | `scored` | 4 | 0.90 | llm | I've been snapping at people over nothing lat |
+| Withdrawnness | `insufficient_evidence` |  | 0.50 | llm |  |
 
 ### `h01_tired`
 
@@ -497,36 +473,34 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Eating Habits (Home-Cooked vs. Eating  | `insufficient_evidence` |  | 0.50 | llm |  |
-| Moroseness | `scored` | 4 | 0.90 | llm | I've been so tired the last few weeks. |
+| Moroseness | `scored` | 4 | 0.85 | llm | I've been so tired the last few weeks. |
 | Compassion Fatigue | `not_observable` |  | 1.00 | observability_gate |  |
-| Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Discontentment | `scored` | 5 | 0.90 | llm | I've been so tired the last few weeks. Draggi |
-| Merriness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Dance rehearsal hours/week | `not_observable` |  | 1.00 | observability_gate |  |
-| Discernment practice hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Burnout Symptoms | `not_observable` |  | 1.00 | observability_gate |  |
-| Acidity | `insufficient_evidence` |  | 0.50 | llm |  |
-| Depression Symptoms | `not_observable` |  | 1.00 | observability_gate |  |
-| Compulsive activities | `insufficient_evidence` |  | 0.50 | llm |  |
-| Sleep-disorder diagnosis | `not_observable` |  | 1.00 | observability_gate |  |
-| Self-improvement | `insufficient_evidence` |  | 0.50 | llm |  |
-| Public-transport km/week | `not_observable` |  | 1.00 | observability_gate |  |
-| Emotionalism | `insufficient_evidence` |  | 0.50 | llm |  |
-| Happiness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Blissfulness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Depression (DEP) | `not_observable` |  | 1.00 | observability_gate |  |
-| Observing | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Desperation | `insufficient_evidence` |  | 0.50 | llm |  |
-| General Mood and Attitude | `scored` | 2 | 0.80 | llm | Honestly I've been so tired the last few week |
 | Breakfast-skipping frequency | `not_observable` |  | 1.00 | observability_gate |  |
-| Negative Affect Frequency | `not_observable` |  | 1.00 | observability_gate |  |
-| Risktaking | `insufficient_evidence` |  | 0.50 | llm |  |
-| FSH level | `not_observable` |  | 1.00 | observability_gate |  |
-| Withdrawnness | `scored` | 3 | 0.90 | llm | I've been so tired the last few weeks. |
-| Basophil count | `not_observable` |  | 1.00 | observability_gate |  |
+| Blissfulness | `insufficient_evidence` |  | 0.90 | llm |  |
+| Burnout Symptoms | `not_observable` |  | 1.00 | observability_gate |  |
+| Wake-time consistency | `not_observable` |  | 1.00 | observability_gate |  |
+| Vivacity | `insufficient_evidence` |  | 0.95 | llm |  |
+| Depression (DEP) | `not_observable` |  | 1.00 | observability_gate |  |
+| Caffeine intake (mg/day) | `not_observable` |  | 1.00 | observability_gate |  |
+| Sleep-disorder diagnosis | `not_observable` |  | 1.00 | observability_gate |  |
+| Eating Habits (Home-Cooked vs. Eating  | `insufficient_evidence` |  | 0.95 | llm |  |
+| General Mood and Attitude | `scored` | 4 | 0.85 | llm | I've been so tired the last few weeks. |
+| Happiness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Discontentment | `scored` | 5 | 0.90 | llm | I've been so tired the last few weeks. Draggi |
+| Sleep-environment temperature | `not_observable` |  | 1.00 | observability_gate |  |
 | Sleep Apnea | `not_observable` |  | 1.00 | observability_gate |  |
+| Depression Symptoms | `not_observable` |  | 1.00 | observability_gate |  |
+| Boredom Susceptibility | `insufficient_evidence` |  | 0.70 | llm |  |
 | Irritability | `insufficient_evidence` |  | 0.50 | llm |  |
+| Merriness | `insufficient_evidence` |  | 0.60 | llm |  |
+| Stress Recovery Ability | `insufficient_evidence` |  | 0.70 | llm |  |
+| Slothfulness | `insufficient_evidence` |  | 0.60 | llm |  |
+| Commute time/day | `not_observable` |  | 1.00 | observability_gate |  |
+| Hypomania (Ma) | `not_observable` |  | 1.00 | observability_gate |  |
+| Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
+| FSH level | `not_observable` |  | 1.00 | observability_gate |  |
+| Withdrawnness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Basophil count | `not_observable` |  | 1.00 | observability_gate |  |
 
 ### `h02_saving`
 
@@ -534,32 +508,34 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Digital-nomad months | `not_observable` |  | 1.00 | observability_gate |  |
-| Quran khatam cycles per year | `not_observable` |  | 1.00 | observability_gate |  |
-| Reiki sessions / year | `not_observable` |  | 1.00 | observability_gate |  |
-| Managing emotions | `insufficient_evidence` |  | 0.50 | llm |  |
-| Museum visits/year | `not_observable` |  | 1.00 | observability_gate |  |
-| Vrata vows observed / year | `not_observable` |  | 1.00 | observability_gate |  |
-| Observing | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Channeling sessions / year | `not_observable` |  | 1.00 | observability_gate |  |
-| Music-lessons years | `not_observable` |  | 1.00 | observability_gate |  |
-| Self-improvement | `scored` | 3 | 0.80 | llm | I cut my spending a lot this year and I'm fin |
-| Organized lifestyle | `insufficient_evidence` |  | 0.40 | llm |  |
-| Eco-tourism trips | `insufficient_evidence` |  | 0.30 | llm |  |
-| Compassion Fatigue | `not_observable` |  | 1.00 | observability_gate |  |
-| Merriness | `insufficient_evidence` |  | 0.30 | llm |  |
-| Sustainable-transport usage | `insufficient_evidence` |  | 0.50 | llm |  |
-| Discontentment | `insufficient_evidence` |  | 0.50 | llm |  |
-| Risktaking | `insufficient_evidence` |  | 0.50 | llm |  |
-| Choir participation years | `not_observable` |  | 1.00 | observability_gate |  |
-| Orderliness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Preferred epistemology | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Dietary Habits | `insufficient_evidence` |  | 0.50 | llm |  |
-| Arts and Humanities | `insufficient_evidence` |  | 0.50 | llm |  |
-| Cooking and Culinary Arts | `insufficient_evidence` |  | 0.50 | llm |  |
 | Eating Habits (Home-Cooked vs. Eating  | `insufficient_evidence` |  | 0.50 | llm |  |
+| Organized lifestyle | `insufficient_evidence` |  | 0.50 | llm |  |
+| Snacking Behavior | `insufficient_evidence` |  | 0.50 | llm |  |
+| Dietary Habits | `insufficient_evidence` |  | 0.50 | llm |  |
 | Graffiti appreciation | `insufficient_evidence` |  | 0.50 | llm |  |
+| Casual lifestyle | `insufficient_evidence` |  | 0.50 | llm |  |
+| Gamified-finance-app usage | `insufficient_evidence` |  | 0.40 | llm |  |
+| Observing | `policy_blocked` |  | 1.00 | policy_gate |  |
+| Cooking and Culinary Arts | `insufficient_evidence` |  | 0.30 | llm |  |
+| Quran khatam cycles per year | `not_observable` |  | 1.00 | observability_gate |  |
+| Arts and Humanities | `insufficient_evidence` |  | 0.20 | llm |  |
+| Digital-nomad months | `not_observable` |  | 1.00 | observability_gate |  |
+| Aestheticism | `insufficient_evidence` |  | 0.10 | llm |  |
+| Sustainable-transport usage | `insufficient_evidence` |  | 0.50 | llm |  |
+| Travel-companions diversity | `insufficient_evidence` |  | 0.50 | llm |  |
+| Preference for Home-Cooked vs Restaura | `insufficient_evidence` |  | 0.50 | llm |  |
+| Eco-tourism trips | `insufficient_evidence` |  | 0.50 | llm |  |
+| Aesthetic Appreciation | `insufficient_evidence` |  | 0.50 | llm |  |
+| Learning Style | `insufficient_evidence` |  | 0.50 | llm |  |
+| Slothfulness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Preferred epistemology | `policy_blocked` |  | 1.00 | policy_gate |  |
+| Reiki sessions / year | `not_observable` |  | 1.00 | observability_gate |  |
+| Economic reasoning | `scored` | 4 | 0.90 | llm | I cut my spending a lot this year and I'm fin |
+| Creative resilience | `insufficient_evidence` |  | 0.50 | llm |  |
+| Participation in Community Activities | `insufficient_evidence` |  | 0.50 | llm |  |
+| Self-improvement | `scored` | 4 | 0.85 | llm | I cut my spending a lot this year and I'm fin |
 | Subscription count | `not_observable` |  | 1.00 | observability_gate |  |
+| Orderliness | `insufficient_evidence` |  | 0.75 | llm |  |
 | Nationality | `not_observable` |  | 1.00 | observability_gate |  |
 
 ### `h03_practice`
@@ -568,32 +544,32 @@ Self-reported model confidence vs actual exact-score agreement. This is a diagno
 
 | facet | status | score | conf | origin | evidence |
 |---|---|---:|---:|---|---|
-| Observing | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Types of Mindfulness Techniques Used | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Humility practice index | `not_observable` |  | 1.00 | observability_gate |  |
-| Tiferet | `not_observable` |  | 1.00 | observability_gate |  |
-| Discontentment | `insufficient_evidence` |  | 0.50 | llm |  |
-| Commute time/day | `not_observable` |  | 1.00 | observability_gate |  |
-| Sukkot lulav-shaking days | `not_observable` |  | 1.00 | observability_gate |  |
-| Merriness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Role of Spirituality in Community Invo | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Dhikr repetitions / day | `not_observable` |  | 1.00 | observability_gate |  |
-| Ideas generated/day | `not_observable` |  | 1.00 | observability_gate |  |
-| Compulsive activities | `insufficient_evidence` |  | 0.50 | llm |  |
-| Discernment practice hours / week | `not_observable` |  | 1.00 | observability_gate |  |
-| Holiness | `policy_blocked` |  | 1.00 | policy_gate |  |
-| I Ching hexagram 22 resonance level | `not_observable` |  | 1.00 | observability_gate |  |
-| Time outdoors/day (h) | `not_observable` |  | 1.00 | observability_gate |  |
-| Inattentiveness | `insufficient_evidence` |  | 0.50 | llm |  |
-| Satya Adherence | `policy_blocked` |  | 1.00 | policy_gate |  |
-| Selfcontrol | `insufficient_evidence` |  | 0.50 | llm |  |
+| Blissfulness | `scored` | 5 | 1.00 | llm | I feel so calm and centred after my morning p |
+| Peacefulness | `scored` | 5 | 1.00 | llm | I feel so calm and centred after my morning p |
+| Mantra meditation | `not_observable` |  | 1.00 | observability_gate |  |
 | General Mood and Attitude | `scored` | 5 | 1.00 | llm | I feel so calm and centred after my morning p |
-| Rising sign is Scorpio | `not_observable` |  | 1.00 | observability_gate |  |
-| Blissfulness | `scored` | 4 | 1.00 | llm | It's easily the best part of my day and I'd b |
-| I Ching hexagram 43 resonance level | `not_observable` |  | 1.00 | observability_gate |  |
-| Caffeine intake (mg/day) | `not_observable` |  | 1.00 | observability_gate |  |
-| Ridván festival participation | `not_observable` |  | 1.00 | observability_gate |  |
-| Pilgrimage participation count | `not_observable` |  | 1.00 | observability_gate |  |
-| Enthusiasm | `scored` | 4 | 1.00 | llm | I feel so calm and centred after my morning p |
+| Managing emotions | `scored` | 3 | 1.00 | llm | It's easily the best part of my day and I'd b |
+| Use of Nature as a Stress Reliever | `insufficient_evidence` |  | 1.00 | llm |  |
+| Stress Recovery Ability | `scored` | 4 | 0.90 | llm | I feel so calm and centred after my morning p |
+| Selfcontrol | `insufficient_evidence` |  | 0.30 | llm |  |
+| Vivacity | `insufficient_evidence` |  | 0.20 | llm |  |
+| Types of Mindfulness Techniques Used | `policy_blocked` |  | 1.00 | policy_gate |  |
+| Irritability | `insufficient_evidence` |  | 0.20 | llm |  |
+| Joyfulness | `scored` | 4 | 0.90 | llm | I feel so calm and centred after my morning p |
+| Inattentiveness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Observing | `policy_blocked` |  | 1.00 | policy_gate |  |
+| Compulsive activities | `insufficient_evidence` |  | 0.80 | llm |  |
+| Discontentment | `insufficient_evidence` |  | 0.80 | llm |  |
+| Happiness | `scored` | 4 | 0.90 | llm | I feel so calm and centred after my morning p |
+| Slothfulness | `insufficient_evidence` |  | 0.80 | llm |  |
+| Merriness | `insufficient_evidence` |  | 0.50 | llm |  |
+| Activator: Turning thoughts into actio | `insufficient_evidence` |  | 0.50 | llm |  |
+| Patient care orientation | `insufficient_evidence` |  | 0.50 | llm |  |
 | Yoga discipline hours / week | `not_observable` |  | 1.00 | observability_gate |  |
+| Patience: Resistance to anger | `insufficient_evidence` |  | 0.50 | llm |  |
+| Attitude toward learning | `insufficient_evidence` |  | 0.50 | llm |  |
+| Archon meditation frequency | `not_observable` |  | 1.00 | observability_gate |  |
+| Pilgrimage participation count | `not_observable` |  | 1.00 | observability_gate |  |
+| Enthusiasm | `scored` | 4 | 0.90 | llm | I feel so calm and centred after my morning p |
 | Nationality | `not_observable` |  | 1.00 | observability_gate |  |
+| Dhikr repetitions / day | `not_observable` |  | 1.00 | observability_gate |  |

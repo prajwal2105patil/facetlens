@@ -257,6 +257,40 @@ every K), and because four measured failures in a row are what localised the
 real bottleneck: a bi-encoder cannot bridge an abstract label to a concrete
 narrative, and the fix is a reranker, not better inputs to the same comparison.
 
+### Correction 9 - the same reasoning error, three times, and the third one shipped
+
+Corrections 4 and 8 both record the same mistake: taking a measurement that
+could not isolate a cause and treating it as if it had. I wrote both of them up,
+noted the lesson in both, and then made the error a third time - on the most
+prominent number in the submission.
+
+I reported that fixing the anchor scale cost 11 points of status agreement. Four
+variables had changed between those two runs: the anchor scale, the retrieval
+mode, the new evidence-policy gate, and facet expansions. Re-running with only
+the retrieval mode reverted moved status agreement from 74.5% to **87.3%**. The
+anchor scale was not the cause. A one-word default was.
+
+Worse, that default was contradicted by **my own ablation**, which had already
+measured hybrid retrieval as inferior to dense and simultaneously reported dense
+as the shipped configuration. I built the measurement, ran it, wrote it up, and
+never changed the code it was measuring.
+
+**The pattern, stated plainly:** I reach for the first plausible causal story
+and stop looking. It is fast and it is usually wrong in a way that survives
+casual review, because a plausible story reads exactly like a correct one.
+Corrections 4, 8 and 9 are the same failure at increasing cost - a decision
+record, then 45 minutes of compute, then a false claim in a submitted document.
+
+**What actually catches it** is not more care at the moment of writing. It is
+mechanical: change one variable per run, and check that the configuration under
+test is the configuration the code runs. Both are cheap. Neither is what I did.
+
+**What I would build if this were production:** the benchmark report should
+record the full configuration that produced it - retrieval mode, anchor version,
+gate set, expansion state - as a header block generated from the live objects,
+not from what the author believes is set. A confounded comparison would then be
+visible in the diff between two reports instead of surviving into prose.
+
 ## Reference labels - provenance
 
 `data/benchmark/reference_labels.jsonl` was **drafted with AI assistance, then

@@ -404,3 +404,107 @@ project and neither the benchmark nor the test suite could have found it. It
 needed an adversarial case aimed at the *seam between* two controls that were
 each individually correct. It is also the one I explicitly predicted would
 pass.
+
+---
+
+## #11. The pipeline ran a retrieval mode the evidence contradicted
+
+**Symptom.** None visible. Everything ran, every report generated, every test
+passed. The defect was found by reading `retrieve.py` while looking for
+something else.
+
+**Diagnosis.** `retrieve()` and `route()` both declared `mode: str = "hybrid"`.
+The benchmark never passes a mode, so every run since commit `8c5c947` used
+hybrid retrieval. Meanwhile `ablation.py` listed the shipped arm as
+`("enriched+expansions", "retrieval_text", True, "dense")` and the generated
+report described **dense** as the shipped configuration.
+
+So the code ran one configuration and the documentation described another - and
+the one it ran was the one my own ablation had already measured as **worse**
+(10/19 vs 12/19 should-score recall at K=25).
+
+**Root cause.** I wrote the hybrid fusion, set it as the default on the
+assumption that fusing two signals must beat one, then measured that assumption
+and found it false - and never went back to change the default. The ablation
+existed specifically to test this and I did not act on its result.
+
+**Why it mattered far beyond the recall number.** Hybrid was introduced in the
+*same commit* as the anchor v2 scale change. The comparison I then published
+changed four variables at once:
+
+| | 85.5% run | 74.5% run |
+|---|---|---|
+| anchor scale | v1 | v2 |
+| retrieval mode | dense | **hybrid** |
+| Gate 3c evidence policy | absent | present |
+| facet expansions | absent | present |
+
+I attributed the entire 11-point drop to the anchor scale, in README and in
+DEBUGGING #9. **That attribution was not supported by the experiment.**
+
+**Fix.** Default changed to `dense`, matching both the measurement and the
+documentation.
+
+**Verification - the isolated re-run.** Same anchor v2, same Gate 3c, same
+expansions, only the mode reverted:
+
+| | v2 (hybrid) | **v4 (dense)** |
+|---|---:|---:|
+| status agreement | 74.5% | **87.3%** |
+| correct abstentions | 83.3% | **91.7%** |
+| missed abstentions | 6 | **3** |
+| false abstentions | 8 | **4** |
+
+One variable, +12.8 points. The anchor scale was not the cause of the
+regression; an untested default was.
+
+**What this really cost.** A one-word default, contradicted by a measurement I
+had already run, produced a wrong causal claim in the most prominent number in
+the submission. The lesson is not "test your defaults" - it is that an ablation
+is worthless if its result does not flow back into the code it was measuring.
+
+---
+
+## #12. The reference labels are calibrated to a scale the system stopped using
+
+**Symptom.** In the v4 run, status agreement reached its best value (87.3%) and
+exact score agreement fell to its worst (3/15, 20%) - while +/-1 agreement
+stayed high at 86.7%. Good at deciding *whether* to score, bad at *what* to
+score, but never badly wrong.
+
+**Diagnosis.** Computed the signed difference on every pair where both the
+reference and the system produced a score:
+
+```
+system - reference:  +1 : 8 pairs   <- the mode
+                     +0 : 3
+                     -1 : 2
+                     +2 : 1
+                     -3 : 1
+```
+
+Eight of fifteen are off by exactly +1. That is a scale offset, not scatter.
+
+**Root cause.** The reference labels were authored against **anchor v1**, where
+level 1 meant *"no or very weak evidence"*. Anchor v2 redefined level 1 as
+*"present but minimally expressed"*, so every level now asserts the facet is
+present and the whole scale shifted up one notch relative to the labels.
+
+The system is not mis-scoring. **The yardstick changed and the reference set did
+not.** Exact agreement across a scale redefinition is close to meaningless,
+which is exactly what the numbers show: the metric that ignores level
+(status agreement) improved, the metric that depends on it collapsed.
+
+**Fix: deliberately NOT applied.** The obvious move is to re-derive the labels
+under v2 anchors. Doing that *after* seeing which direction improves the score
+is fitting the reference set to the system, and it would discredit the entire
+benchmark - the one artefact whose value depends on being independent.
+
+The legitimate version is to re-derive each label from its own written
+rationale under the v2 definitions, blind to system output, ideally by someone
+who has not seen these results. That is recorded as future work in README.
+
+**What is reportable today.** Status agreement, abstention accuracy and +/-1
+agreement are all valid across the change because none of them depends on the
+absolute level. Exact agreement is not, and is reported with that caveat
+attached rather than quoted bare.
