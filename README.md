@@ -121,6 +121,17 @@ from the committed cache.
 python -m pytest tests/ -q      # 38 tests, no model or network needed
 ```
 
+### Reproducibility check (actually performed)
+
+Cloned this repository to a clean directory and verified from scratch:
+
+- `enrich` regenerates `enriched_facets.csv` **byte-identically**
+  (md5 `0ae85114...` before and after, `git status` clean)
+- **38/38 tests pass** in the fresh clone with no setup beyond `pip install`
+- `artifacts/embeddings/*.npy` is gitignored, was absent in the clone, and was
+  **regenerated automatically** on first use
+- no `.env`, `.key`, `.pem`, or token files are tracked
+
 ---
 
 ## Part 1 - facet audit
