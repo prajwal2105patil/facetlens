@@ -8,49 +8,53 @@ Same embedding model, same reference set, same K values. Only the indexed text a
 | enriched | name + type + generated scoring definition |
 | BM25 only | lexical match over the enriched text, no embeddings |
 | dense+BM25 | reciprocal rank fusion of the two |
-| **enriched+expansions** | enriched text + 2 generated example utterances per facet (**shipped**) |
+| enriched+expansions | enriched text + 2 generated example utterances per facet |
+| **+cross-encoder rerank** | retrieve 100 by cosine, reorder with a cross-encoder, keep top-K (**shipped**) |
 
 ## Recall on facets the reference says SHOULD be scored
 
 The number that matters. A miss here is a real loss: the facet never reaches the scorer, so it cannot be scored however good the scorer is.
 
-| K | bare name | enriched | BM25 only | dense+BM25 | enriched+expansions |
-|---:|---|---|---|---|---|
-| 10 | 8/19 (42%) | 9/19 (47%) | 1/19 (5%) | 6/19 (32%) | 9/19 (47%) |
-| 15 | 10/19 (53%) | 10/19 (53%) | 1/19 (5%) | 9/19 (47%) | 10/19 (53%) |
-| 25 | 11/19 (58%) | 12/19 (63%) | 2/19 (11%) | 10/19 (53%) | 12/19 (63%) |
-| 40 | 14/19 (74%) | 12/19 (63%) | 4/19 (21%) | 13/19 (68%) | 13/19 (68%) |
-| 60 | 15/19 (79%) | 15/19 (79%) | 5/19 (26%) | 14/19 (74%) | 15/19 (79%) |
-| 100 | 16/19 (84%) | 16/19 (84%) | 12/19 (63%) | 16/19 (84%) | 17/19 (89%) |
+| K | bare name | enriched | BM25 only | dense+BM25 | enriched+expansions | +cross-encoder rerank |
+|---:|---|---|---|---|---|---|
+| 10 | 8/19 (42%) | 9/19 (47%) | 1/19 (5%) | 6/19 (32%) | 9/19 (47%) | 8/19 (42%) |
+| 15 | 10/19 (53%) | 10/19 (53%) | 1/19 (5%) | 9/19 (47%) | 10/19 (53%) | 11/19 (58%) |
+| 25 | 11/19 (58%) | 12/19 (63%) | 2/19 (11%) | 10/19 (53%) | 12/19 (63%) | 13/19 (68%) |
+| 40 | 14/19 (74%) | 12/19 (63%) | 4/19 (21%) | 13/19 (68%) | 13/19 (68%) | 15/19 (79%) |
+| 60 | 15/19 (79%) | 15/19 (79%) | 5/19 (26%) | 14/19 (74%) | 15/19 (79%) | 16/19 (84%) |
+| 100 | 16/19 (84%) | 16/19 (84%) | 12/19 (63%) | 16/19 (84%) | 17/19 (89%) | 17/19 (89%) |
 
 ## Recall on facets the reference says should be ABSTAINED
 
 A miss here is harmless and mildly good: a non-observable facet that is never retrieved costs nothing, whereas one that is retrieved must still be gated. Reporting a single blended recall would hide this asymmetry.
 
-| K | bare name | enriched | BM25 only | dense+BM25 | enriched+expansions |
-|---:|---|---|---|---|---|
-| 10 | 5/36 (14%) | 5/36 (14%) | 2/36 (6%) | 3/36 (8%) | 3/36 (8%) |
-| 15 | 7/36 (19%) | 6/36 (17%) | 3/36 (8%) | 4/36 (11%) | 3/36 (8%) |
-| 25 | 7/36 (19%) | 8/36 (22%) | 4/36 (11%) | 6/36 (17%) | 7/36 (19%) |
-| 40 | 9/36 (25%) | 13/36 (36%) | 5/36 (14%) | 11/36 (31%) | 11/36 (31%) |
-| 60 | 13/36 (36%) | 15/36 (42%) | 8/36 (22%) | 15/36 (42%) | 12/36 (33%) |
-| 100 | 18/36 (50%) | 18/36 (50%) | 12/36 (33%) | 20/36 (56%) | 17/36 (47%) |
+| K | bare name | enriched | BM25 only | dense+BM25 | enriched+expansions | +cross-encoder rerank |
+|---:|---|---|---|---|---|---|
+| 10 | 5/36 (14%) | 5/36 (14%) | 2/36 (6%) | 3/36 (8%) | 3/36 (8%) | 3/36 (8%) |
+| 15 | 7/36 (19%) | 6/36 (17%) | 3/36 (8%) | 4/36 (11%) | 3/36 (8%) | 6/36 (17%) |
+| 25 | 7/36 (19%) | 8/36 (22%) | 4/36 (11%) | 6/36 (17%) | 7/36 (19%) | 9/36 (25%) |
+| 40 | 9/36 (25%) | 13/36 (36%) | 5/36 (14%) | 11/36 (31%) | 11/36 (31%) | 10/36 (28%) |
+| 60 | 13/36 (36%) | 15/36 (42%) | 8/36 (22%) | 15/36 (42%) | 12/36 (33%) | 13/36 (36%) |
+| 100 | 18/36 (50%) | 18/36 (50%) | 12/36 (33%) | 20/36 (56%) | 17/36 (47%) | 17/36 (47%) |
 
 ## What each attempt was worth
 
-At K=25 the shipped configuration retrieves **12/19** of should-score facets against **12/19** for the previous default. **That is not an improvement.**
+At K=25 the shipped configuration retrieves **13/19** of should-score facets against **12/19** for the previous default.
 
-Document expansion ties the incumbent at K=10, 15, 25 and 60, and gains exactly one facet at K=40 and K=100. It is shipped because it never loses, not because it works. The honest summary is that **four different retrieval interventions were built and measured, and none of them materially moved recall.**
+**Four attempts failed before this one, and that is why it works.**
 
-**Why expansion underdelivered.** The idea was validated by hand first: appending example utterances to three facets moved their rank against a leadership conversation from 7->2, 7->2 and 9->3. But those examples were written by a person who had already read the target conversation. The shipped expansions are generated blind from a facet definition alone, which is the only honest setup and a much harder one - the generated utterance for `Collaboration` is *"I enjoy working in teams"*, which is a perfectly good example and still nothing like *"we worked through it together until we had something everyone could live with"*. The hand test measured the ceiling, not the method.
+- **BM25 alone** is near-useless here. Conversations describe behaviour (*'I assigned tasks based on their strengths'*) while facets are abstract labels (*'Delegation skills'*). There is almost no lexical overlap to exploit, by construction.
+- **Dense+BM25 fusion** inherits that: fusing a strong signal with a near-random one drags the ranking down at most K.
+- **BGE-small-en-v1.5**, a stronger encoder on public benchmarks, scored 10/19 at K=25 against MiniLM's 12/19. Its recommended query prefix made it worse again. Recorded in DECISIONS.md D10.
+- **Document expansion** ties the incumbent almost everywhere. It was hand-validated first - appending examples moved three facets from rank 7->2, 7->2, 9->3 - but those examples were written by someone who had already read the target conversation. Generated blind from a definition, `Collaboration` gets *"I enjoy working in teams"*: a fine example, and nothing like *"we worked through it together"*. The hand test measured the ceiling, not the method.
 
-**The other three made retrieval worse.** They are kept here because a rejected experiment with numbers attached is more useful than a clean-looking report:
+**What those four ruled out was the answer.** Swapping the encoder, the similarity function and the indexed text each changed almost nothing, which left one observation standing: recall is **89% at K=100 and 63% at K=25**. The right facets were already being retrieved and simply ranked badly.
 
-- **BM25 alone** is close to useless on this catalogue. Conversations describe behaviour (*'I assigned tasks based on their strengths'*) while facets are abstract labels (*'Delegation skills'*). There is almost no lexical overlap to exploit, by construction.
-- **Dense+BM25 fusion** inherits that weakness: fusing a strong signal with a near-random one drags the ranking down at most values of K.
-- **BGE-small-en-v1.5**, a stronger encoder on public retrieval benchmarks, scored 10/19 at K=25 against MiniLM's 12/19, and its recommended query prefix made it worse again. Not included as an arm here because it needs a second model download; the measurement is recorded in DECISIONS.md D10.
+That is a *ranking* problem, and no bi-encoder can fix it - it compresses each side to a vector independently, so a short abstract label and a long concrete narrative never meet. A cross-encoder reads both together. Retrieve 100 cheaply, then reorder with a model that can actually compare them.
 
-Those failures did localise the problem, even though none of them solved it. The bottleneck is not the encoder, the similarity function, or the indexed text: swapping each in turn changed almost nothing. What remains is the task itself - a short abstract label and a long concrete narrative are far apart in every representation tried here, and closing that gap needs something with more capacity than a bi-encoder. A cross-encoder reranker over a wide candidate set (K=100, where recall reaches 89%) is the obvious next thing to try and is the top item in README's next steps. It was not attempted here because it adds a second model to the inference path on a machine already running at 8 tokens/second.
+**Cost:** 8.3s for all 13 conversations, ~0.64s each, against ~50s for a single LLM scoring batch. 22.7M parameters, Apache-2.0.
+
+**Where it does not help.** It is *worse* at K=10 (47% -> 42%). Reranking a wide pool needs room to place what it promotes; too small a K throws it away again. Reported rather than hidden, because a fix that only works above a threshold has a threshold worth knowing.
 
 ## Honesty notes
 

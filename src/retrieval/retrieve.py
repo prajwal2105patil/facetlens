@@ -23,6 +23,7 @@ import numpy as np
 
 from .embed import FacetIndex, build_index, embed_query
 from .lexical import fuse
+from .rerank import DEFAULT_POOL, rerank
 
 
 @dataclass(frozen=True)
@@ -68,31 +69,45 @@ def _to_candidate(row: dict, score: float) -> Candidate:
 
 
 def retrieve(conversation: str, index: FacetIndex | None = None,
-             top_k: int = 25, mode: str = "dense") -> list[Candidate]:
+             top_k: int = 25, mode: str = "rerank") -> list[Candidate]:
     """Gate 1: top-K candidate facets. Relevance only, never evidence.
 
     `mode` selects the signal:
       "dense"   cosine over MiniLM embeddings
       "lexical" BM25 over the same facet text
-      "hybrid"  reciprocal rank fusion of both (default)
+      "hybrid"  reciprocal rank fusion of both
+      "rerank"  dense to a wide pool, then cross-encoder reordering (default)
 
-    DEFAULT IS "dense", and that is load-bearing. An earlier version defaulted
-    to "hybrid" on the assumption that fusing signals must help. The ablation
-    then measured hybrid as WORSE than dense (10/19 vs 12/19 should-score recall
-    at K=25) - but the default was never changed to match, so the pipeline ran
-    a configuration the documentation did not describe and the evidence did not
-    support. See DEBUGGING.md #11.
+    DEFAULT IS "rerank", and every default here is now justified by a number in
+    artifacts/ablation_retrieval.md rather than by intuition. That rule exists
+    because an earlier version defaulted to "hybrid" on the assumption that
+    fusing signals must help; the ablation measured hybrid as WORSE than dense
+    and the default was never updated to match, so the pipeline ran a
+    configuration the evidence contradicted and the docs did not describe.
+    See DEBUGGING.md #11.
     """
     index = index or build_index()
-    if mode == "lexical":
-        scores = index.bm25.score(conversation)
-    elif mode == "dense":
+    if mode in ("dense", "rerank"):
         scores = index.matrix @ embed_query(conversation)
+    elif mode == "lexical":
+        scores = index.bm25.score(conversation)
     elif mode == "hybrid":
         scores = fuse(index.matrix @ embed_query(conversation),
                       index.bm25.score(conversation))
     else:
         raise ValueError(f"unknown retrieval mode {mode!r}")
+
+    if mode == "rerank":
+        # Retrieve a wide pool cheaply, then reorder it with a model that sees
+        # conversation and facet together. The cosine score is kept for
+        # reporting because the cross-encoder's scale means nothing here - only
+        # its ordering is trusted. See rerank.py.
+        pool = min(max(DEFAULT_POOL, top_k), len(scores))
+        candidates = np.argpartition(-scores, pool - 1)[:pool]
+        candidates = candidates[np.argsort(-scores[candidates])]
+        top = rerank(conversation, candidates, index.rows)[:top_k]
+        return [_to_candidate(index.rows[i], scores[i]) for i in top]
+
     k = min(top_k, len(scores))
     # argpartition is O(n); full sort only over the K we keep.
     top = np.argpartition(-scores, k - 1)[:k]
@@ -101,7 +116,7 @@ def retrieve(conversation: str, index: FacetIndex | None = None,
 
 
 def route(conversation: str, index: FacetIndex | None = None, top_k: int = 25,
-          allow_sensitive: bool = False, mode: str = "dense") -> RoutedFacets:
+          allow_sensitive: bool = False, mode: str = "rerank") -> RoutedFacets:
     """Gate 1, then Gate 2, then Gate 2b. Only `scorable` may reach the LLM.
 
     Gate 2b (policy) runs AFTER observability because the two refusals mean

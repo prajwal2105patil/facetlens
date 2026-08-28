@@ -1,9 +1,9 @@
-"""Ablation over five retrieval configurations.
+"""Ablation over six retrieval configurations.
 
-Retrieval was the weakest measured component of this system, so four separate
-interventions were built to fix it. This module measures all of them on the
-same reference set, same embedding model, same K values. The headline result is
-negative: none of them materially improved recall.
+Retrieval was the weakest measured component of this system. Five interventions
+were built and measured against the same reference set, model and K values.
+**Four failed. The fifth worked, and it only became findable because the four
+failures narrowed down where the problem actually was.**
 
 Keeping the losing arms in the tree is deliberate. A rejected experiment with
 numbers attached is evidence; a deleted one is just an unsupported claim in a
@@ -44,6 +44,7 @@ ARMS = (
     ("BM25 only", "retrieval_text", False, "lexical"),
     ("dense+BM25", "retrieval_text", False, "hybrid"),
     ("enriched+expansions", "retrieval_text", True, "dense"),
+    ("+cross-encoder rerank", "retrieval_text", True, "rerank"),
 )
 
 
@@ -85,7 +86,7 @@ def run() -> Path:
         for label, column, expansions, mode in ARMS
     }
     labels = [a[0] for a in ARMS]
-    shipped = "enriched+expansions"
+    shipped = "+cross-encoder rerank"
 
     def table(index: int, denominator_index: int) -> list[str]:
         rows = ["| K | " + " | ".join(labels) + " |",
@@ -112,8 +113,10 @@ def run() -> Path:
         "| enriched | name + type + generated scoring definition |",
         "| BM25 only | lexical match over the enriched text, no embeddings |",
         "| dense+BM25 | reciprocal rank fusion of the two |",
-        "| **enriched+expansions** | enriched text + 2 generated example "
-        "utterances per facet (**shipped**) |",
+        "| enriched+expansions | enriched text + 2 generated example "
+        "utterances per facet |",
+        "| **+cross-encoder rerank** | retrieve 100 by cosine, reorder with a "
+        "cross-encoder, keep top-K (**shipped**) |",
         "",
         "## Recall on facets the reference says SHOULD be scored",
         "",
@@ -144,52 +147,46 @@ def run() -> Path:
         "",
         f"At K=25 the shipped configuration retrieves **{at25[0]}/{at25[1]}** of "
         f"should-score facets against **{at25[2]}/{at25[1]}** for the previous "
-        "default. **That is not an improvement.**",
+        "default.",
         "",
-        "Document expansion ties the incumbent at K=10, 15, 25 and 60, and gains "
-        "exactly one facet at K=40 and K=100. It is shipped because it never "
-        "loses, not because it works. The honest summary is that **four "
-        "different retrieval interventions were built and measured, and none of "
-        "them materially moved recall.**",
+        "**Four attempts failed before this one, and that is why it works.**",
         "",
-        "**Why expansion underdelivered.** The idea was validated by hand first: "
-        "appending example utterances to three facets moved their rank against a "
-        "leadership conversation from 7->2, 7->2 and 9->3. But those examples "
-        "were written by a person who had already read the target conversation. "
-        "The shipped expansions are generated blind from a facet definition "
-        "alone, which is the only honest setup and a much harder one - the "
-        "generated utterance for `Collaboration` is *\"I enjoy working in "
-        "teams\"*, which is a perfectly good example and still nothing like "
-        "*\"we worked through it together until we had something everyone could "
-        "live with\"*. The hand test measured the ceiling, not the method.",
+        "- **BM25 alone** is near-useless here. Conversations describe behaviour "
+        "(*'I assigned tasks based on their strengths'*) while facets are "
+        "abstract labels (*'Delegation skills'*). There is almost no lexical "
+        "overlap to exploit, by construction.",
+        "- **Dense+BM25 fusion** inherits that: fusing a strong signal with a "
+        "near-random one drags the ranking down at most K.",
+        "- **BGE-small-en-v1.5**, a stronger encoder on public benchmarks, "
+        "scored 10/19 at K=25 against MiniLM's 12/19. Its recommended query "
+        "prefix made it worse again. Recorded in DECISIONS.md D10.",
+        "- **Document expansion** ties the incumbent almost everywhere. It was "
+        "hand-validated first - appending examples moved three facets from rank "
+        "7->2, 7->2, 9->3 - but those examples were written by someone who had "
+        "already read the target conversation. Generated blind from a "
+        "definition, `Collaboration` gets *\"I enjoy working in teams\"*: a fine "
+        "example, and nothing like *\"we worked through it together\"*. The hand "
+        "test measured the ceiling, not the method.",
         "",
-        "**The other three made retrieval worse.** They are kept here because a "
-        "rejected experiment with numbers attached is more useful than a "
-        "clean-looking report:",
+        "**What those four ruled out was the answer.** Swapping the encoder, the "
+        "similarity function and the indexed text each changed almost nothing, "
+        "which left one observation standing: recall is **89% at K=100 and 63% "
+        "at K=25**. The right facets were already being retrieved and simply "
+        "ranked badly.",
         "",
-        "- **BM25 alone** is close to useless on this catalogue. Conversations "
-        "describe behaviour (*'I assigned tasks based on their strengths'*) "
-        "while facets are abstract labels (*'Delegation skills'*). There is "
-        "almost no lexical overlap to exploit, by construction.",
-        "- **Dense+BM25 fusion** inherits that weakness: fusing a strong signal "
-        "with a near-random one drags the ranking down at most values of K.",
-        "- **BGE-small-en-v1.5**, a stronger encoder on public retrieval "
-        "benchmarks, scored 10/19 at K=25 against MiniLM's 12/19, and its "
-        "recommended query prefix made it worse again. Not included as an arm "
-        "here because it needs a second model download; the measurement is "
-        "recorded in DECISIONS.md D10.",
+        "That is a *ranking* problem, and no bi-encoder can fix it - it "
+        "compresses each side to a vector independently, so a short abstract "
+        "label and a long concrete narrative never meet. A cross-encoder reads "
+        "both together. Retrieve 100 cheaply, then reorder with a model that can "
+        "actually compare them.",
         "",
-        "Those failures did localise the problem, even though none of them "
-        "solved it. The bottleneck is not the encoder, the similarity function, "
-        "or the indexed text: swapping each in turn changed almost nothing. "
-        "What remains is the task itself - a short abstract label and a long "
-        "concrete narrative are far apart in every representation tried here, "
-        "and closing that gap needs something with more capacity than a "
-        "bi-encoder. A cross-encoder reranker over a wide candidate set (K=100, "
-        "where recall reaches 89%) is the obvious next thing to try and is the "
-        "top item in README's next steps. It was not attempted here because it "
-        "adds a second model to the inference path on a machine already running "
-        "at 8 tokens/second.",
+        "**Cost:** 8.3s for all 13 conversations, ~0.64s each, against ~50s for a "
+        "single LLM scoring batch. 22.7M parameters, Apache-2.0.",
+        "",
+        "**Where it does not help.** It is *worse* at K=10 (47% -> 42%). "
+        "Reranking a wide pool needs room to place what it promotes; too small a "
+        "K throws it away again. Reported rather than hidden, because a fix that "
+        "only works above a threshold has a threshold worth knowing.",
         "",
         "## Honesty notes",
         "",

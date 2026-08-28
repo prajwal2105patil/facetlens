@@ -336,3 +336,39 @@ def test_evidence_gate_does_not_block_ordinary_evidence():
         evidence_quote="assigned tasks by strength", reason="delegation described",
     )
     assert to_facet_verdict(verdict, candidate, conversation).status == Status.SCORED
+
+
+# ------------------------------------------------------------------- reranking
+def test_rerank_mode_returns_top_k_and_preserves_contract():
+    from src.retrieval.embed import build_index
+    from src.retrieval.retrieve import retrieve
+
+    index = build_index()
+    text = "I led a team of five engineers and assigned tasks based on strengths."
+    got = retrieve(text, index, top_k=8, mode="rerank")
+    assert len(got) == 8
+    # retrieval_score must stay the cosine value, never the cross-encoder's:
+    # the two are on incomparable scales and the report shows this number.
+    assert all(-1.0 <= c.retrieval_score <= 1.0 for c in got)
+    assert len({c.facet_id for c in got}) == 8
+
+
+def test_rerank_changes_ordering_but_not_the_candidate_universe():
+    """Reranking must reorder a wide pool, not invent or drop facets."""
+    from src.retrieval.embed import build_index
+    from src.retrieval.retrieve import retrieve
+
+    index = build_index()
+    text = "I led a team of five engineers and assigned tasks based on strengths."
+    dense = [c.facet_id for c in retrieve(text, index, top_k=100, mode="dense")]
+    reranked = [c.facet_id for c in retrieve(text, index, top_k=100, mode="rerank")]
+    assert set(dense) == set(reranked), "rerank must permute the same pool"
+    assert dense != reranked, "rerank should actually change the order"
+
+
+def test_unknown_retrieval_mode_is_rejected():
+    from src.retrieval.embed import build_index
+    from src.retrieval.retrieve import retrieve
+
+    with pytest.raises(ValueError):
+        retrieve("x", build_index(), top_k=3, mode="not_a_mode")
