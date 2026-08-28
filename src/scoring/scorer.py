@@ -62,7 +62,7 @@ def score_batch(conversation: str, batch: list[Candidate],
         # continues and the report shows exactly which facets were affected.
         return [error_verdict(c, f"{type(exc).__name__}: {exc}") for c in batch]
 
-    verdicts, problems = parse_batch(raw)
+    verdicts, problems, repaired = parse_batch(raw)
     by_id = {v.facet_id: v for v in verdicts}
 
     results: list[FacetVerdict] = []
@@ -72,7 +72,9 @@ def score_batch(conversation: str, batch: list[Candidate],
             detail = "; ".join(problems) if problems else "facet missing from response"
             results.append(error_verdict(candidate, detail))
         else:
-            results.append(to_facet_verdict(verdict, candidate, conversation))
+            results.append(to_facet_verdict(
+                verdict, candidate, conversation,
+                schema_repaired=candidate.facet_id in repaired))
     return results
 
 

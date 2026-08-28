@@ -37,12 +37,17 @@ class ModelVerdict(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    # NOTE: every field here is deliberately REQUIRED (no defaults).
+    # This model's JSON schema is handed to the backend as a constrained-decoding
+    # grammar. Pydantic omits defaulted fields from `required`, and the model
+    # then legitimately skips them - which made it emit status="scored" with no
+    # score at all, turning correctly-scored facets into parse errors.
+    # See DEBUGGING.md #4. `score` stays nullable, but must be PRESENT.
     facet_id: str
     status: Literal["scored", "insufficient_evidence"]
-    score: int | None = Field(default=None, ge=1, le=5)
+    score: int | None = Field(ge=1, le=5)
     confidence: float = Field(ge=0.0, le=1.0)
     evidence_quote: str = Field(
-        default="",
         description="Verbatim span copied from the conversation, or empty when abstaining.",
     )
     reason: str = Field(min_length=1)
@@ -73,6 +78,8 @@ class FacetVerdict(BaseModel):
     retrieval_score: float | None = None
     #: Set when the evidence verifier rejected a quote the model invented.
     evidence_verified: bool | None = None
+    #: True when a contradictory model verdict was repaired toward abstention.
+    schema_repaired: bool = False
 
     @model_validator(mode="after")
     def _score_matches_status(self) -> "FacetVerdict":

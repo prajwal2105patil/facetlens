@@ -68,7 +68,11 @@ class OllamaBackend:
     def complete(self, system: str, user: str, schema: dict | None = None) -> str:
         import ollama
 
-        key = _cache_key(self.model, system, user, self.options | {"schema": bool(schema)})
+        # The schema is part of the request (it constrains decoding), so its
+        # CONTENT must be in the cache key. Keying on merely whether a schema
+        # was passed would silently serve responses generated under an older
+        # grammar after the contract changed.
+        key = _cache_key(self.model, system, user, self.options | {"schema": schema})
         cache_path = CACHE_DIR / f"{key}.json"
         if self.use_cache and cache_path.exists():
             return json.loads(cache_path.read_text(encoding="utf-8"))["response"]

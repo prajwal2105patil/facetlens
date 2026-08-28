@@ -85,14 +85,33 @@ def _fence_body(text: str) -> str | None:
     return match.group(1) if match else None
 
 
-def parse_batch(text: str) -> tuple[list[ModelVerdict], list[str]]:
-    """Parse a batch response into valid verdicts plus human-readable problems."""
+def repair_verdict(item: dict) -> dict | None:
+    """Repair exactly one contradiction, and only toward abstention.
+
+    Small models sometimes emit status="scored" with score=null and a reason
+    that plainly describes an absence of evidence. The verdict is internally
+    impossible, but the intent is unambiguous.
+
+    This repair is SAFETY-PRESERVING BY CONSTRUCTION: it can only ever turn a
+    would-be score into an abstention, never the reverse, so it cannot
+    manufacture a score the model did not produce. Every repair is counted and
+    surfaced in the benchmark report rather than quietly applied.
+    """
+    if not isinstance(item, dict):
+        return None
+    if item.get("status") == "scored" and item.get("score") is None:
+        return item | {"status": "insufficient_evidence"}
+    return None
+
+
+def parse_batch(text: str) -> tuple[list[ModelVerdict], list[str], set[str]]:
+    """Parse a batch response into verdicts, problems, and repaired facet ids."""
     payload = extract_json(text)
     if payload is None:
-        return [], ["response was not parseable as JSON"]
+        return [], ["response was not parseable as JSON"], set()
 
     try:
-        return BatchResponse.model_validate(payload).verdicts, []
+        return BatchResponse.model_validate(payload).verdicts, [], set()
     except ValidationError:
         pass
 
@@ -100,21 +119,33 @@ def parse_batch(text: str) -> tuple[list[ModelVerdict], list[str]]:
     # Isolating them means one bad row does not discard the whole batch.
     raw_items = payload.get("verdicts")
     if not isinstance(raw_items, list):
-        return [], ["response JSON had no 'verdicts' list"]
+        return [], ["response JSON had no 'verdicts' list"], set()
 
     verdicts: list[ModelVerdict] = []
     problems: list[str] = []
+    repaired: set[str] = set()
     for index, item in enumerate(raw_items):
         try:
             verdicts.append(ModelVerdict.model_validate(item))
+            continue
         except ValidationError as exc:
             first = exc.errors()[0] if exc.errors() else {}
-            problems.append(
-                f"verdict[{index}] invalid: "
-                f"{'.'.join(str(p) for p in first.get('loc', ()))} "
-                f"{first.get('msg', 'schema violation')}"
-            )
-    return verdicts, problems
+
+        candidate = repair_verdict(item)
+        if candidate is not None:
+            try:
+                verdicts.append(ModelVerdict.model_validate(candidate))
+                repaired.add(str(item.get("facet_id")))
+                continue
+            except ValidationError:
+                pass
+
+        problems.append(
+            f"verdict[{index}] invalid: "
+            f"{'.'.join(str(p) for p in first.get('loc', ()))} "
+            f"{first.get('msg', 'schema violation')}"
+        )
+    return verdicts, problems, repaired
 
 
 def _normalise_for_match(text: str) -> str:
@@ -139,7 +170,7 @@ def verify_evidence(quote: str, conversation: str) -> bool | None:
 
 
 def to_facet_verdict(verdict: ModelVerdict, candidate: Candidate,
-                     conversation: str) -> FacetVerdict:
+                     conversation: str, schema_repaired: bool = False) -> FacetVerdict:
     """Apply the evidence verifier and build the final verdict."""
     verified = (
         verify_evidence(verdict.evidence_quote, conversation)
@@ -164,6 +195,7 @@ def to_facet_verdict(verdict: ModelVerdict, candidate: Candidate,
             origin="evidence_verifier",
             retrieval_score=candidate.retrieval_score,
             evidence_verified=False,
+            schema_repaired=schema_repaired,
         )
 
     return FacetVerdict(
@@ -178,6 +210,7 @@ def to_facet_verdict(verdict: ModelVerdict, candidate: Candidate,
         origin="llm",
         retrieval_score=candidate.retrieval_score,
         evidence_verified=verified,
+        schema_repaired=schema_repaired,
     )
 
 
