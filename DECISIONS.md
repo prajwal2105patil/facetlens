@@ -94,9 +94,12 @@ has to catch - and it costs nothing at run time. But this is now recorded as a
 decision the evidence does not strongly justify rather than a validated win.
 
 **Trade-off.** The definition text now influences retrieval, so a bad definition
-degrades retrieval as well as scoring. (c) - a stronger embedding model - is the
-real fix and remains the top item in README's "with another day", because
-neither variant exceeds 84% recall even at K=100.
+degrades retrieval as well as scoring.
+
+**Update after D10.** Option (c), a stronger embedding model, was the obvious
+next move from here and it was tested: BGE-small-en-v1.5 scored *worse* than
+MiniLM (10/19 vs 12/19 at K=25). The real fix turned out to be changing the
+indexed text rather than the encoder - see D11.
 
 ---
 
