@@ -459,14 +459,37 @@ That is a *ranking* problem, and no bi-encoder can solve it - it compresses each
 side to a vector independently, so a short abstract label and a long concrete
 narrative never meet. A cross-encoder reads both together.
 
-**Shipped: retrieve 100 by cosine, reorder with `ms-marco-MiniLM-L-6-v2`
+**Built: retrieve 100 by cosine, reorder with `ms-marco-MiniLM-L-6-v2`
 (22.7M params, Apache-2.0), keep top-K.** Best or tied-best at every K from 15
-upward. **Worse at K=10** (47% -> 42%) - reranking a wide pool needs room to
-place what it promotes, and a fix with a threshold has a threshold worth
-stating.
+up. Worse at K=10 (47% -> 42%) - reranking a wide pool needs room to place what
+it promotes. Cost 8.3s for all 13 conversations, ~1% of one LLM batch.
 
-**Cost:** 8.3s for all 13 conversations, ~0.64s each, against ~50s for one LLM
-scoring batch - roughly 1% of the cost of the stage it feeds.
+### And it is not the default, because it made the end-to-end result worse
+
+| | **dense (shipped)** | +rerank |
+|---|---:|---:|
+| retrieval recall@25 | 34.5% | **40.0%** |
+| **status agreement** | **87.3%** | 81.8% |
+| correct abstentions | **91.7%** | 88.9% |
+| false abstentions | **4** | 6 |
+
+The reason is a flaw in my own reasoning when I proposed it. Reference-labelled
+facets are **force-included regardless of retrieval**, deliberately, so
+retrieval misses cannot hide inside the agreement number. That means improving
+retrieval *cannot* improve agreement on those pairs - they were already being
+scored. I built a fix for a metric that, by my own evaluation design, could not
+move the metric I cared about.
+
+What did change was batch composition: better ranking surfaced more observable
+facets, the observability gate handled 18% of verdicts instead of 35%, more
+facets reached the LLM, and verdicts shifted with the altered context. That is
+perturbation, not improvement.
+
+So `dense` remains the default and `rerank` ships as a measured option
+(`--mode rerank`). **The retrieval figure quoted above is therefore not the best
+this repository can produce** - 40.0% is available and 34.5% ships. That is the
+cost of preferring the metric that reflects end-to-end quality over one that
+measures a component in isolation. Full reasoning in DECISIONS.md D12.
 
 **This does not corrupt the scoring metrics.** Reference-labelled facets that
 retrieval misses are force-included before scoring (DECISIONS.md D8), so

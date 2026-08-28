@@ -69,22 +69,28 @@ def _to_candidate(row: dict, score: float) -> Candidate:
 
 
 def retrieve(conversation: str, index: FacetIndex | None = None,
-             top_k: int = 25, mode: str = "rerank") -> list[Candidate]:
+             top_k: int = 25, mode: str = "dense") -> list[Candidate]:
     """Gate 1: top-K candidate facets. Relevance only, never evidence.
 
     `mode` selects the signal:
       "dense"   cosine over MiniLM embeddings
       "lexical" BM25 over the same facet text
       "hybrid"  reciprocal rank fusion of both
-      "rerank"  dense to a wide pool, then cross-encoder reordering (default)
+      "rerank"  dense to a wide pool, then cross-encoder reordering
 
-    DEFAULT IS "rerank", and every default here is now justified by a number in
+    DEFAULT IS "dense", and every default here is justified by a number in
     artifacts/ablation_retrieval.md rather than by intuition. That rule exists
     because an earlier version defaulted to "hybrid" on the assumption that
     fusing signals must help; the ablation measured hybrid as WORSE than dense
     and the default was never updated to match, so the pipeline ran a
     configuration the evidence contradicted and the docs did not describe.
     See DEBUGGING.md #11.
+
+    "rerank" is available and measurably retrieves better (40.0% vs 34.5%
+    recall@25), but it is NOT the default: it scores worse end to end
+    (81.8% vs 87.3% status agreement). See DECISIONS.md D12 - improving
+    retrieval cannot improve agreement here, because labelled facets are
+    force-included regardless of what retrieval finds.
     """
     index = index or build_index()
     if mode in ("dense", "rerank"):
@@ -116,7 +122,7 @@ def retrieve(conversation: str, index: FacetIndex | None = None,
 
 
 def route(conversation: str, index: FacetIndex | None = None, top_k: int = 25,
-          allow_sensitive: bool = False, mode: str = "rerank") -> RoutedFacets:
+          allow_sensitive: bool = False, mode: str = "dense") -> RoutedFacets:
     """Gate 1, then Gate 2, then Gate 2b. Only `scorable` may reach the LLM.
 
     Gate 2b (policy) runs AFTER observability because the two refusals mean

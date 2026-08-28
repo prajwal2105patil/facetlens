@@ -308,40 +308,62 @@ not a per-query cost.
 
 ---
 
-## D12. A cross-encoder reranker, and why a second model is justified here
+## D12. A cross-encoder reranker: built, measured, and NOT made the default
 
 **Problem.** After D10 and D11, retrieval was still the weakest measured
 component (63% should-score recall at K=25) and four interventions had failed.
 What survived them was a structural fact: recall is **89% at K=100** and 63% at
 K=25. The facets were being retrieved. They were being ranked badly.
 
-**Options.** (a) accept the ceiling; (b) raise K and pay more LLM calls;
-(c) fine-tune a bi-encoder on facet/utterance pairs; (d) rerank a wide pool with
-a cross-encoder.
+**Choice.** Retrieve a wide pool (100) by cosine, then reorder it with
+`ms-marco-MiniLM-L-6-v2` (22.7M params, Apache-2.0). A bi-encoder embeds each
+side independently, so an abstract label and a concrete narrative are compared
+only after both are compressed; a cross-encoder attends to them jointly, which
+is exactly the comparison the four failures showed was missing.
 
-**Choice: (d).** A bi-encoder embeds each side independently, so an abstract
-label and a concrete narrative are compared only after both have been
-compressed. A cross-encoder attends to them jointly, which is exactly the
-comparison the four failures showed was missing.
+**It worked on the metric it targeted.** Should-score recall, best or tied-best
+at every K from 15 up:
 
-(b) was rejected as paying for the symptom - K=40 gains recall but sends ~60%
-more facets to a 50s-per-batch scorer. (c) needs training data this assignment
-does not have.
+| K | dense | +rerank |
+|---:|---|---|
+| 25 | 12/19 (63%) | **13/19 (68%)** |
+| 40 | 13/19 (68%) | **15/19 (79%)** |
+| 60 | 15/19 (79%) | **16/19 (84%)** |
 
-**Measured:** best or tied-best at every K from 15 up; 63% -> 68% at K=25,
-74% -> 79% at K=40. Worse at K=10.
+Cost: 8.3s for all 13 conversations, ~1% of one LLM scoring batch.
 
-**Trade-off, stated plainly.** This adds a **second model to the runtime path** -
-the thing D3 and D10 both argued against elsewhere. The justification is
-arithmetic, not preference: 0.64s per conversation against ~50s for one LLM
-batch is ~1% of the cost of the stage it feeds, and it is the only intervention
-of five that moved the number. A dependency that buys a measured improvement at
-1% of the dominant cost is a different proposition from faiss (D3), which would
-have optimised something already 3,000x from the bottleneck.
+**And it made the end-to-end result worse.**
 
-**What I would still challenge.** It is an MS-MARCO model doing a task it was
-not trained for, validated on 19 labelled facets. A four-example hand check
-suggested it was failing; the full measurement said otherwise. On n=19 a
-one-facet difference is ~5 points, so the K=25 gain (12 -> 13) is real but
-should not be oversold - the K=40 and K=60 gains (+2, +1 with consistent
-direction) carry more weight than any single cell.
+| | dense (shipped) | +rerank |
+|---|---:|---:|
+| retrieval recall@25 | 34.5% | **40.0%** |
+| **status agreement** | **87.3%** | 81.8% |
+| correct abstentions | **91.7%** | 88.9% |
+| false abstentions | **4** | 6 |
+
+**Why - and this is a flaw in my reasoning when I proposed it.** Labelled facets
+are **force-included regardless of retrieval** (D8), deliberately, so retrieval
+misses cannot hide inside the agreement number. But that means improving
+retrieval *cannot* improve agreement on labelled pairs: they were already being
+scored. I proposed a fix for a metric that, by my own evaluation design, could
+not move the metric I cared about.
+
+What did change is batch composition. Better ranking surfaced more *observable*
+facets, so the observability gate handled only 66 verdicts (18%) instead of 126
+(35%), more facets reached the LLM, and verdicts shifted with the altered
+context. That is perturbation, not improvement.
+
+**Decision: `dense` remains the default; `rerank` ships as a measured option.**
+Defaulting to a configuration with worse end-to-end numbers in order to chase a
+secondary metric would repeat exactly the mistake that caused DEBUGGING #11 -
+an unjustified default contradicted by an available measurement.
+
+**Trade-off, stated plainly.** The retrieval number in the README is therefore
+*not* the best this repository can produce. 40.0% is available and 34.5% ships.
+That is the honest cost of preferring the metric that reflects end-to-end
+quality over the one that reflects a component in isolation.
+
+**On sample size.** 87.3% vs 81.8% is a 3-pair difference on 55 pairs, so some
+of this gap is noise. The direction is consistent across status agreement,
+correct abstentions and false abstentions, which is why it decided the default -
+but a larger reference set could overturn it, and that is listed as next work.
