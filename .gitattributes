@@ -1,0 +1,5 @@
+# Normalise line endings so generated artefacts hash identically regardless of
+# the platform the pipeline was run on. The determinism check in README depends
+# on this.
+* text=auto eol=lf
+*.npy binary
