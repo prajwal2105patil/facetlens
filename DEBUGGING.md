@@ -308,6 +308,14 @@ concentrate its damage wherever the text is least like what you tested on.
 
 ## #9. The scoring scale offered two correct answers
 
+> **SUPERSEDED IN PART - read #11 first.** The diagnosis below (the scale
+> contradicted its own status set) is correct and the fix stands. The
+> *measurement* below is not: the 85.5% -> 74.5% comparison changed four
+> variables at once, and re-running with only the retrieval mode reverted
+> recovered the drop entirely (74.5% -> 87.3%). **The anchor change did not
+> cost 11 points.** This entry is left intact rather than rewritten, because
+> what I concluded from a confounded experiment is the more useful record.
+
 **Symptom.** On *"Things are okay. Not much to report this week."* the system
 scored `Enthusiasm` **1** where the reference expects `insufficient_evidence`.
 It counted as a missed abstention - the dangerous category.

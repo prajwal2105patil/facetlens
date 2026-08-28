@@ -244,7 +244,7 @@ hardcoded.
 | Exact score agreement | 3/15 (20.0%) - see the calibration note below |
 | Missed abstentions (scored something unsupported) | 3 |
 | False abstentions (abstained where a score was expected) | 4 |
-| Verdicts ending in `error` | **1 of 362** |
+| Verdicts ending in `error` | **1 of 361** |
 | Facets answered with **no LLM call** | 136 (38%) |
 
 **Zero hallucination-trap failures**, in every run. No medical, lab,
