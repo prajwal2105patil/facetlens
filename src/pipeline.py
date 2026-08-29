@@ -4,6 +4,7 @@
     python -m src.pipeline embed                      # precompute facet embeddings
     python -m src.pipeline score --text "..."         # score one conversation
     python -m src.pipeline benchmark                  # run the benchmark + report
+    python -m src.pipeline notebook                   # rebuild the walkthrough notebook
 """
 
 from __future__ import annotations
@@ -125,6 +126,13 @@ def cmd_redteam(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_notebook(args: argparse.Namespace) -> int:
+    from .evaluation.notebook import run
+
+    print(f"Wrote {run()}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="src.pipeline", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -163,6 +171,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_red = sub.add_parser("redteam", help="attack the system's own defences")
     add_runtime_flags(p_red)
     p_red.set_defaults(func=cmd_redteam)
+
+    sub.add_parser("notebook",
+                   help="regenerate the rendered walkthrough notebook"
+                   ).set_defaults(func=cmd_notebook)
 
     sub.add_parser("ablation",
                    help="compare bare vs enriched retrieval text (no LLM calls)"

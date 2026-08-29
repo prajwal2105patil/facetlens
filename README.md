@@ -121,6 +121,19 @@ from the committed cache.
 python -m pytest tests/ -q      # 57 tests, no model or network needed
 ```
 
+### Start here if you are reviewing this
+
+**[`artifacts/report.ipynb`](artifacts/report.ipynb)** is a rendered walkthrough -
+the catalogue audit, the four gates running on a live conversation, the
+hallucination traps abstaining, the pipeline surviving five kinds of malformed
+model output, and the results including what does not work. GitHub renders it
+in the browser; nothing to install and nothing to run.
+
+It is **generated** by `python -m src.pipeline notebook`, which executes every
+cell and embeds the real output. No number in it is typed by hand, so it cannot
+drift from the code - which matters here, because four separate documentation
+drifts were caught and logged during this build (DEBUGGING.md #9, #11).
+
 ### Reproducibility check (actually performed)
 
 Cloned this repository to a clean directory and verified from scratch:
